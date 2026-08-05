@@ -1725,28 +1725,66 @@ function piRoll(){
   requestAnimationFrame(frame);
 }
 function piUnroll(){
-  const svg=$('piSvg'); const r=+$('piR').value; const R=70, cx=120, cy=130, N=16;
+  const svg=$('piSvg'); const rVal=+$('piR').value;
+  const R=65, cx=105, cy=135, N=16;
   const ns='http://www.w3.org/2000/svg';
   svg.innerHTML='';
-  svg.appendChild(mkline(10,210,450,210,'#bbb',2));
-  const circ=document.createElementNS(ns,'circle'); circ.setAttribute('cx',cx);circ.setAttribute('cy',cy);circ.setAttribute('r',R);
-  circ.setAttribute('fill','rgba(255,159,67,.18)');circ.setAttribute('stroke','#ff9f43');circ.setAttribute('stroke-width','3'); svg.appendChild(circ);
-  const step=(2*Math.PI)/N, w=200/N;
+  // baseline
+  svg.appendChild(mkline(10,210,480,210,'#bbb',2));
+  // original circle (ghosted)
+  const circ=document.createElementNS(ns,'circle');
+  circ.setAttribute('cx',cx); circ.setAttribute('cy',cy); circ.setAttribute('r',R);
+  circ.setAttribute('fill','rgba(255,159,67,.12)'); circ.setAttribute('stroke','#ff9f43');
+  circ.setAttribute('stroke-width','2'); circ.setAttribute('stroke-dasharray','5,4');
+  svg.appendChild(circ);
+  // sector dimensions for tiling
+  const step=(2*Math.PI)/N;
+  const arcLen=Math.PI*R/N;  // half-arc length per sector (straightened)
+  const tileW=arcLen*1.45;   // visual tile width (slightly expanded for clarity)
+  const startX=230;           // where the tiled row begins (right of circle)
+  const rowY=155;             // baseline Y for the tiled row
+  const flipH=R*0.92;         // vertical amplitude (point-up / point-down)
   for(let i=0;i<N;i++){
     const a0=-Math.PI/2+i*step, a1=a0+step;
-    const x0=cx+R*Math.cos(a0), y0=cy+R*Math.sin(a0), x1=cx+R*Math.cos(a1), y1=cy+R*Math.sin(a1);
+    const x0=cx+R*Math.cos(a0), y0=cy+R*Math.sin(a1);
+    const x1=cx+R*Math.cos(a1), y1=cy+R*Math.sin(a1);
     const p=document.createElementNS(ns,'path');
+    // draw sector as path from center to arc
     p.setAttribute('d',`M${cx},${cy} L${x0.toFixed(1)},${y0.toFixed(1)} A${R},${R} 0 0 1 ${x1.toFixed(1)},${y1.toFixed(1)} Z`);
-    p.setAttribute('fill', i%2?'rgba(255,210,63,.5)':'rgba(255,159,67,.5)');
-    p.setAttribute('stroke','#fff'); p.setAttribute('stroke-width','1.5'); p.setAttribute('class','sector');
-    const tx=(i-(N-1)/2)*w; const ty=(i%2? R*0.5 : -R*0.5);
-    p.dataset.tx=tx; p.dataset.ty=ty; p.style.transformBox='view-box';
+    p.setAttribute('fill', i%2?'rgba(255,210,63,.55)':'rgba(255,159,67,.55)');
+    p.setAttribute('stroke','#fff'); p.setAttribute('stroke-width','1.5');
+    p.setAttribute('class','sector');
+    // target: absolute position in tiled row
+    const tx=startX+i*tileW - cx;  // translate X relative to original center
+    const ty=rowY - cy + (i%2 ? -flipH : 0);  // even=point-down(at baseline), odd=point-up
+    p.dataset.tx=tx; p.dataset.ty=ty;
+    p.style.transformOrigin='center';
     svg.appendChild(p);
   }
+  // dimension labels for the tiled rectangle
+  const rectLen=N*tileW;
+  setTimeout(()=>{
+    svg.querySelectorAll('.sector').forEach(p=>{
+      p.style.transition='transform .7s cubic-bezier(.4,0,.2,1)';
+      p.style.transform=`translate(${p.dataset.tx}px,${p.dataset.ty}px)`;
+    });
+    // after animation, draw dimension lines
+    setTimeout(()=>{
+      const g=document.createElementNS(ns,'g');
+      g.setAttribute('opacity','0');
+      g.innerHTML=
+        `<line x1="${startX-4}" y1="${rowY+flipH+8}" x2="${startX+rectLen+4}" y2="${rowY+flipH+8}" stroke="#ff6ba6" stroke-width="2" stroke-dasharray="4,3"/>`+
+        `<line x1="${startX-4}" y1="${rowY-flipH-4}" x2="${startX-4}" y2="${rowY+flipH+8}" stroke="#ff6ba6" stroke-width="2" stroke-dasharray="4,3"/>`+
+        `<line x1="${startX+rectLen+4}" y1="${rowY-flipH-4}" x2="${startX+rectLen+4}" y2="${rowY+flipH+8}" stroke="#ff6ba6" stroke-width="2" stroke-dasharray="4,3"/>`+
+        `<text x="${startX+rectLen/2}" y="${rowY+flipH+22}" text-anchor="middle" font-size="12" font-family="Baloo 2,sans-serif" fill="#ff6ba6" font-weight="600">长 ≈ πr</text>`+
+        `<text x="${startX+rectLen+14}" y="${rowY+4}" text-anchor="start" font-size="12" font-family="Baloo 2,sans-serif" fill="#ff6ba6" font-weight="600">宽=r</text>`;
+      svg.appendChild(g);
+      requestAnimationFrame(()=>{ g.style.transition='opacity .4s'; g.setAttribute('opacity','1'); });
+    },750);
+  },350);
   piUnrolled=true;
   $('piFormula').innerHTML=`圆切成 ${N} 份再交错拼起来 → 越来越像<b>长方形</b>：长 ≈ π r，宽 = r`;
   $('piExplain').innerHTML=`扇形越切越细，拼出的图形越接近长方形。这个长方形的长 ≈ 圆周长的一半 = <b>π r</b>，宽 = <b>r</b>，所以 面积 = π r × r = <b>π r²</b>。`;
-  setTimeout(()=>{ svg.querySelectorAll('.sector').forEach(p=>{ p.style.transition='transform .6s'; p.style.transform=`translate(${p.dataset.tx}px,${p.dataset.ty}px)`; }); },300);
 }
 function mkline(x1,y1,x2,y2,stroke,w){ const l=document.createElementNS('http://www.w3.org/2000/svg','line'); l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('stroke',stroke);l.setAttribute('stroke-width',w); return l; }
 
@@ -1756,22 +1794,22 @@ let geo3dType='cube';
 const GEO3D={
   cube:{ name:'正方体', inputs:[{k:'a',label:'棱长 a',min:1,max:12,def:4}],
     calc:d=>{const a=d.a; return { formula:`体积 V = a\u00B3 = <b>${a}\u00B3=${a*a*a}</b>　|　表面积 S = 6a\u00B2 = <b>6\u00D7${a*a}=${6*a*a}</b>`, explain:`正方体6个面都是相同的正方形(a\u00D7a)，表面积=6个a\u00B2；体积=长\u00D7宽\u00D7高=a\u00B3。` };},
-    html:d=>{ return '<div class="geo-illust">'+svgCube()+'</div>'; } },
+    html:d=>{ return '<div class="geo-illust">'+svgCube(d)+'</div>'; } },
   cuboid:{ name:'长方体', inputs:[{k:'a',label:'长 a',min:1,max:12,def:6},{k:'b',label:'宽 b',min:1,max:12,def:4},{k:'c',label:'高 c',min:1,max:12,def:5}],
     calc:d=>{const{a,b,c}=d; return { formula:`体积 V = a\u00D7b\u00D7c = <b>${a*b*c}</b>　|　表面积 S = 2(ab+bc+ca) = <b>${2*(a*b+b*c+c*a)}</b>`, explain:`长方体体积=长\u00D7宽\u00D7高；表面积=前后、左右、上下六个面之和。` };},
-    html:d=>{ return '<div class="geo-illust">'+svgCuboid()+'</div>'; } },
+    html:d=>{ return '<div class="geo-illust">'+svgCuboid(d)+'</div>'; } },
   cylinder:{ name:'圆柱', inputs:[{k:'r',label:'底面半径 r',min:1,max:12,def:4},{k:'h',label:'高 h',min:1,max:12,def:6}],
     calc:d=>{const r=d.r,h=d.h,V=Math.PI*r*r*h,S=2*Math.PI*r*(h+r); return { formula:`体积 V = \u03C0r\u00B2h = \u03C0\u00D7${r*r}\u00D7${h} \u2248 <b>${V.toFixed(1)}</b>　|　表面积 S = 2\u03C0r(h+r) \u2248 <b>${S.toFixed(1)}</b>`, explain:`圆柱体积=底面积(\u03C0r\u00B2)\u00D7高；侧面展开是长方形(长=周长2\u03C0r，宽=h)。` };},
-    html:d=>{ return '<div class="geo-illust">'+svgCylinder()+'</div>'; } },
+    html:d=>{ return '<div class="geo-illust">'+svgCylinder(d)+'</div>'; } },
   cone:{ name:'圆锥', inputs:[{k:'r',label:'底面半径 r',min:1,max:12,def:4},{k:'h',label:'高 h',min:1,max:12,def:6}],
     calc:d=>{const r=d.r,h=d.h,l=Math.sqrt(r*r+h*h),V=Math.PI*r*r*h/3,S=Math.PI*r*(r+l); return { formula:`体积 V = \u2153\u03C0r\u00B2h = \u2153\u00D7\u03C0\u00D7${r*r}\u00D7${h} \u2248 <b>${V.toFixed(1)}</b>　|　表面积 S = \u03C0r(r+l) \u2248 <b>${S.toFixed(1)}</b>`, explain:`圆锥体积=同底等高圆柱体积的\u2153；母线l=\u221A(r\u00B2+h\u00B2)。` };},
-    html:d=>{ return '<div class="geo-illust">'+svgCone()+'</div>'; } },
+    html:d=>{ return '<div class="geo-illust">'+svgCone(d)+'</div>'; } },
   ball:{ name:'球体', inputs:[{k:'r',label:'半径 r',min:1,max:12,def:5}],
     calc:d=>{const r=d.r,V=4/3*Math.PI*r*r*r,S=4*Math.PI*r*r; return { formula:`体积 V = 4/3 \u03C0r\u00B3 = 4/3\u00D7\u03C0\u00D7${r*r*r} \u2248 <b>${V.toFixed(1)}</b>　|　表面积 S = 4\u03C0r\u00B2 \u2248 <b>${S.toFixed(1)}</b>`, explain:`球体积=4/3 \u03C0r\u00B3，表面积=4\u03C0r\u00B2（像包住球的那层皮）。` };},
-    html:d=>{ return '<div class="geo-illust">'+svgSphere()+'</div>'; } },
+    html:d=>{ return '<div class="geo-illust">'+svgSphere(d)+'</div>'; } },
   pyramid:{ name:'四棱锥', inputs:[{k:'a',label:'底边长 a',min:1,max:12,def:5},{k:'h',label:'高 h',min:1,max:12,def:6}],
     calc:d=>{const a=d.a,h=d.h,V=a*a*h/3; return { formula:`体积 V = \u2153 \u00D7 底面积 \u00D7 高 = \u2153\u00D7a\u00B2\u00D7h = \u2153\u00D7${a*a}\u00D7${h} = <b>${V.toFixed(1)}</b>`, explain:`棱锥体积=\u2153\u00D7底面积\u00D7高（和圆锥一样，都是同底柱体的\u2153）。` };},
-    html:d=>{ return '<div class="geo-illust">'+svgPyramid()+'</div>'; } }
+    html:d=>{ return '<div class="geo-illust">'+svgPyramid(d)+'</div>'; } }
 };
 function scaleWrap(k,inner){ return `<div class="scaleWrap" style="transform:scale(${k})">${inner}</div>`; }
 function buildGeo3dBtns(){
@@ -2029,72 +2067,95 @@ function fracStep(){
 
 /* init */
 show('home');
-/* ===== 立体图形卡通插画（精致透视风 SVG）===== */
-function svgCube(){
+/* ===== 立体图形卡通插画（参数化 + 标注）===== */
+function svgCube(d){
+  const a=(d&&d.a)||4, s=0.65+(a/18), L=70*s;
+  const ox=140-L*0.65, oy=185-L, w=L*0.93, ddx=L*0.63;
   return `<svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="ckTop" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff0b3"/><stop offset="100%" stop-color="#ffd54f"/></linearGradient>
+      <linearGradient id="ckT" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff0b3"/><stop offset="100%" stop-color="#ffd54f"/></linearGradient>
       <linearGradient id="ckL" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ffca28"/><stop offset="100%" stop-color="#ffb300"/></linearGradient>
       <linearGradient id="ckR" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff8f00"/><stop offset="100%" stop-color="#e65100"/></linearGradient>
     </defs>
-    <ellipse cx="140" cy="205" rx="55" ry="12" fill="rgba(0,0,0,.09)"/>
-    <polygon points="140,45 210,80 210,150 140,185 70,150 70,80" fill="url(#ckL)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
-    <polygon points="140,45 210,80 280,50 210,15" fill="url(#ckTop)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
-    <polygon points="210,80 280,50 280,120 210,150" fill="url(#ckR)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
-    <polygon points="140,45 175,63 175,123 140,105" fill="#fff" opacity=".25"/>
-    <line x1="140" y1="45" x2="140" y2="185" stroke="#5d4037" stroke-width="1.5" opacity=".3"/>
-    <line x1="70" y1="80" x2="210" y2="80" stroke="#5d4037" stroke-width="1.5" opacity=".3"/>
-    <line x1="210" y1="80" x2="210" y2="150" stroke="#5d4037" stroke-width="1.5" opacity=".3"/>
+    <ellipse cx="140" cy="${205+s*2}" rx="${45*s}" ry="${10*s}" fill="rgba(0,0,0,.09)"/>
+    <polygon points="${ox},${oy-L} ${ox+L},${oy-L*0.37} ${ox+L},${oy-L*0.37+L} ${ox},${oy} ${ox-L*0.5},${oy-L*0.37+L} ${ox-L*0.5},${oy-L*0.37}" fill="url(#ckL)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="${ox},${oy-L} ${ox+L},${oy-L*0.37} ${ox+L+ddx},${oy-L*0.87} ${ox+ddx},${oy-L*1.27}" fill="url(#ckT)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="${ox+L},${oy-L*0.37} ${ox+L+ddx},${oy-L*0.87} ${ox+L+ddx},${oy-L*0.87+L*0.78} ${ox+L},${oy-L*0.37+L}" fill="url(#ckR)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="${ox},${oy-L} ${ox+L*0.5},${oy-L*0.68} ${ox+L*0.5},${oy-L*0.08} ${ox},${oy-L*0.4}" fill="#fff" opacity=".25"/>
+    <text x="${ox-L*0.35}" y="${oy+18}" font-size="${13*s}" font-family="Baloo 2,sans-serif" fill="#e65100" font-weight="700">a=${a}</text>
+    <text x="${ox+L+ddx+4}" y="${oy-L*0.5}" font-size="${13*s}" font-family="Baloo 2,sans-serif" fill="#e65100" font-weight="700">a</text>
+    <text x="${ox+L*0.2}" y="${oy-L-10}" font-size="${13*s}" font-family="Baloo 2,sans-serif" fill="#e65100" font-weight="700">a</text>
   </svg>`;
 }
-function svgCuboid(){
+
+function svgCuboid(d){
+  const a=(d&&d.a)||6, b=(d&&d.b)||4, c=(d&&d.c)||5;
+  const sa=0.55+(a/20), sb=0.55+(b/20), sc=0.5+(c/22);
+  const Lx=75*sa, Ly=60*sb, Lz=65*sc;
+  const ox=130-Lx*0.6, oy=190-Ly;
   return `<svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="cbTop" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b3e5fc"/><stop offset="100%" stop-color="#81d4fa"/></linearGradient>
+      <linearGradient id="cbT" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#b3e5fc"/><stop offset="100%" stop-color="#81d4fa"/></linearGradient>
       <linearGradient id="cbL" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#4fc3f7"/><stop offset="100%" stop-color="#29b6f6"/></linearGradient>
       <linearGradient id="cbR" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#0288d1"/><stop offset="100%" stop-color="#01579b"/></linearGradient>
     </defs>
-    <ellipse cx="130" cy="208" rx="60" ry="11" fill="rgba(0,0,0,.08)"/>
-    <polygon points="125,55 215,95 215,155 125,195 35,155 35,95" fill="url(#cbL)" stroke="#1565c0" stroke-width="2.5" stroke-linejoin="round"/>
-    <polygon points="125,55 215,95 275,60 185,20" fill="url(#cbTop)" stroke="#1565c0" stroke-width="2.5" stroke-linejoin="round"/>
-    <polygon points="215,95 275,60 275,120 215,155" fill="url(#cbR)" stroke="#1565c0" stroke-width="2.5" stroke-linejoin="round"/>
-    <polygon points="125,55 170,77 170,137 125,115" fill="#fff" opacity=".28"/>
-    <text x="140" y="230" text-anchor="middle" font-size="13" font-family="Baloo 2" fill="#1565c0" opacity=".6">长方体</text>
+    <ellipse cx="135" cy="${208+sc*3}" rx="${58*sa}" ry="${11*sb}" fill="rgba(0,0,0,.08)"/>
+    <polygon points="${ox},${oy-Ly} ${ox+Lx},${oy-Ly*0.35} ${ox+Lx},${oy-Ly*0.35+Ly} ${ox},${oy} ${ox-Lx*0.42},${oy-Ly*0.35+Ly} ${ox-Lx*0.42},${oy-Ly*0.35}" fill="url(#cbL)" stroke="#1565c0" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="${ox},${oy-Ly} ${ox+Lx},${oy-Ly*0.35} ${ox+Lx+Lz*0.72},${oy-Ly*0.85} ${ox+Lz*0.72},${oy-Ly*1.35}" fill="url(#cbT)" stroke="#1565c0" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="${ox+Lx},${oy-Ly*0.35} ${ox+Lx+Lz*0.72},${oy-Ly*0.85} ${ox+Lx+Lz*0.72},${oy-Ly*0.85+Ly*0.82} ${ox+Lx},${oy-Ly*0.35+Ly}" fill="url(#cbR)" stroke="#1565c0" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="${ox},${oy-Ly} ${ox+Lx*0.6},${oy-Ly*0.62} ${ox+Lx*0.6},${oy-Ly*0.02} ${ox},${oy-Ly*0.38}" fill="#fff" opacity=".28"/>
+    <text x="${ox-Lx*0.25}" y="${oy+16}" font-size="${12*sa}" font-family="Baloo 2,sans-serif" fill="#01579b" font-weight="700">a=${a}</text>
+    <text x="${ox+Lx+Lz*0.72+4}" y="${oy-Ly*0.45}" font-size="${12*sb}" font-family="Baloo 2,sans-serif" fill="#01579b" font-weight="700">b=${b}</text>
+    <text x="${ox+Lx*0.15}" y="${oy-Ly-10}" font-size="${12*sc}" font-family="Baloo 2,sans-serif" fill="#01579b" font-weight="700">c=${c}</text>
   </svg>`;
 }
-function svgCylinder(){
+
+function svgCylinder(d){
+  const r=(d&&d.r)||4, h=(d&&d.h)||6;
+  const sr=0.5+(r/18), sh=0.5+(h/18);
+  const Rx=62*sr, Ry=14*sr, H=95*sh, cyTop=65, cyBot=cyTop+H;
+  const cx=140;
   return `<svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="cyBody" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#80deea"/><stop offset="35%" stop-color="#4dd0e1"/><stop offset="70%" stop-color="#26c6da"/><stop offset="100%" stop-color="#0097a7"/></linearGradient>
-      <radialGradient id="cyTop" cx="45%" cy="35%" r="65%"><stop offset="0%" stop-color="#e0f7fa"/><stop offset="100%" stop-color="#80deea"/></radialGradient>
+      <linearGradient id="cyB" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#80deea"/><stop offset="35%" stop-color="#4dd0e1"/><stop offset="70%" stop-color="#26c6da"/><stop offset="100%" stop-color="#0097a7"/></linearGradient>
+      <radialGradient id="cyTp" cx="45%" cy="35%" r="65%"><stop offset="0%" stop-color="#e0f7fa"/><stop offset="100%" stop-color="#80deea"/></radialGradient>
     </defs>
-    <ellipse cx="140" cy="208" rx="62" ry="14" fill="rgba(0,0,0,.08)"/>
-    <path d="M78,68 L78,178 A62,16 0 0 0 202,178 L202,68 Z" fill="url(#cyBody)" stroke="#00838f" stroke-width="2.5"/>
-    <ellipse cx="140" cy="68" rx="62" ry="16" fill="url(#cyTop)" stroke="#00838f" stroke-width="2.5"/>
-    <ellipse cx="112" cy="118" rx="10" ry="42" fill="#fff" opacity=".3" transform="rotate(-8,112,118)"/>
-    <path d="M82,75 L82,172" stroke="#fff" stroke-width="2" opacity=".25"/>
-    <path d="M198,75 L198,172" stroke="#004d40" stroke-width="1.5" opacity=".2"/>
-    <text x="140" y="232" text-anchor="middle" font-size="13" font-family="Baloo 2" fill="#00838f" opacity=".6">圆柱</text>
+    <ellipse cx="${cx}" cy="${cyBot+10}" rx="${Rx}" ry="${Ry}" fill="rgba(0,0,0,.08)"/>
+    <path d="M${cx-Rx},${cyTop} L${cx-Rx},${cyBot} A${Rx},${Ry} 0 0 0 ${cx+Rx},${cyBot} L${cx+Rx},${cyTop} Z" fill="url(#cyB)" stroke="#00838f" stroke-width="2.5"/>
+    <ellipse cx="${cx}" cy="${cyTop}" rx="${Rx}" ry="${Ry}" fill="url(#cyTp)" stroke="#00838f" stroke-width="2.5"/>
+    <ellipse cx="${cx-Rx*0.38}" cy="${cyTop+H*0.48}" rx="${8*sr}" ry="${H*0.38}" fill="#fff" opacity=".3" transform="rotate(-8,${cx-Rx*0.38},${cyTop+H*0.48})"/>
+    <text x="${cx-Rx-8}" y="${cyBot+22}" font-size="${12*sr}" font-family="Baloo 2,sans-serif" fill="#00838f" font-weight="700">r=${r}</text>
+    <text x="${cx+Rx+8}" y="${cyTop+H*0.5}" font-size="${12*sh}" font-family="Baloo 2,sans-serif" fill="#00838f" font-weight="700">h=${h}</text>
   </svg>`;
 }
-function svgCone(){
+
+function svgCone(d){
+  const r=(d&&d.r)||4, h=(d&&d.h)||6;
+  const sr=0.5+(r/17), sh=0.45+(h/20);
+  const Rx=64*sr, Rbase=68*sr, H=130*sh;
+  const cx=140, topY=42, baseY=topY+H;
   return `<svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="cnBody" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ffcc80"/><stop offset="30%" stop-color="#ffa726"/><stop offset="75%" stop-color="#fb8c00"/><stop offset="100%" stop-color="#e65100"/></linearGradient>
-      <radialGradient id="cnBase" cx="50%" cy="30%" r="70%"><stop offset="0%" stop-color="#ffe0b2"/><stop offset="100%" stop-color="#fb8c00"/></radialGradient>
+      <linearGradient id="cnB" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ffcc80"/><stop offset="30%" stop-color="#ffa726"/><stop offset="75%" stop-color="#fb8c00"/><stop offset="100%" stop-color="#e65100"/></linearGradient>
+      <radialGradient id="cnBs" cx="50%" cy="30%" r="70%"><stop offset="0%" stop-color="#ffe0b2"/><stop offset="100%" stop-color="#fb8c00"/></radialGradient>
     </defs>
-    <ellipse cx="140" cy="200" rx="64" ry="15" fill="rgba(0,0,0,.08)"/>
-    <polygon points="140,38 72,185 208,185" fill="url(#cnBody)" stroke="#bf360c" stroke-width="2.5" stroke-linejoin="round"/>
-    <ellipse cx="140" cy="185" rx="68" ry="17" fill="url(#cnBase)" stroke="#bf360c" stroke-width="2.5"/>
-    <polygon points="140,48 98,176 122,183" fill="#fff" opacity=".28"/>
-    <circle cx="140" cy="38" r="4" fill="#fff" opacity=".7"/>
-    <text x="140" y="228" text-anchor="middle" font-size="13" font-family="Baloo 2" fill="#e65100" opacity=".65">圆锥</text>
+    <ellipse cx="${cx}" cy="${baseY+12}" rx="${Rx}" ry="${14*sr}" fill="rgba(0,0,0,.08)"/>
+    <polygon points="${cx},${topY} ${cx-Rx*0.88},${baseY} ${cx+Rx*0.88},${baseY}" fill="url(#cnB)" stroke="#bf360c" stroke-width="2.5" stroke-linejoin="round"/>
+    <ellipse cx="${cx}" cy="${baseY}" rx="${Rbase}" ry="${16*sr}" fill="url(#cnBs)" stroke="#bf360c" stroke-width="2.5"/>
+    <polygon points="${cx},${topY+10} ${cx-Rx*0.5},${baseY-8} ${cx-Rx*0.22},${baseY-2}" fill="#fff" opacity=".28"/>
+    <circle cx="${cx}" cy="${topY}" r="4" fill="#fff" opacity=".7"/>
+    <text x="${cx-Rbase-6}" y="${baseY+28}" font-size="${12*sr}" font-family="Baloo 2,sans-serif" fill="#e65100" font-weight="700">r=${r}</text>
+    <text x="${cx+Rx+10}" y="${topY+H*0.45}" font-size="${12*sh}" font-family="Baloo 2,sans-serif" fill="#e65100" font-weight="700">h=${h}</text>
   </svg>`;
 }
-function svgSphere(){
+
+function svgSphere(d){
+  const r=(d&&d.r)||5;
+  const s=0.55+(r/16), R=76*s;
+  const cx=140, cy=115;
   return `<svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <radialGradient id="sphG" cx="36%" cy="30%" r="68%">
+      <radialGradient id="spG" cx="36%" cy="30%" r="68%">
         <stop offset="0%" stop-color="#e1f5fe"/>
         <stop offset="18%" stop-color="#81d4fa"/>
         <stop offset="55%" stop-color="#29b6f6"/>
@@ -2106,34 +2167,37 @@ function svgSphere(){
         <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
       </radialGradient>
     </defs>
-    <ellipse cx="140" cy="210" rx="58" ry="12" fill="rgba(0,0,0,.08)"/>
-    <circle cx="140" cy="115" r="78" fill="url(#sphG)" stroke="#01579b" stroke-width="2.5"/>
-    <circle cx="110" cy="85" r="24" fill="url(#hlG)"/>
-    <ellipse cx="140" cy="115" rx="76" ry="22" fill="none" stroke="#fff" stroke-width="1.2" opacity=".3"/>
-    <ellipse cx="140" cy="115" rx="56" ry="76" fill="none" stroke="#fff" stroke-width="1" opacity=".2"/>
-    <path d="M62,115 Q90,95 140,93 Q190,95 218,115" fill="none" stroke="#fff" stroke-width=".8" opacity=".25"/>
-    <text x="140" height="232" text-anchor="middle" font-size="13" font-family="Baloo 2" fill="#01579b" opacity=".6" y="232">球体</text>
+    <ellipse cx="${cx}" cy="${cy+R+12}" rx="${R*0.75}" ry="${11*s}" fill="rgba(0,0,0,.08)"/>
+    <circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#spG)" stroke="#01579b" stroke-width="2.5"/>
+    <circle cx="${cx-R*0.32}" cy="${cy-R*0.33}" r="${R*0.28}" fill="url(#hlG)"/>
+    <ellipse cx="${cx}" cy="${cy}" rx="${R*0.97}" ry="${R*0.28}" fill="none" stroke="#fff" stroke-width="1.2" opacity=".3"/>
+    <ellipse cx="${cx}" cy="${cy}" rx="${R*0.72}" ry="${R*0.97}" fill="none" stroke="#fff" stroke-width="1" opacity=".2"/>
+    <line x1="${cx-R}" y1="${cy}" x2="${cx+R}" y2="${cy}" stroke="#01579b" stroke-width="1.5" opacity=".3" stroke-dasharray="4,3"/>
+    <text x="${cx+R+6}" y="${cy+4}" font-size="${12*s}" font-family="Baloo 2,sans-serif" fill="#01579b" font-weight="700">r=${r}</text>
   </svg>`;
 }
-function svgPyramid(){
+
+function svgPyramid(d){
+  const a=(d&&d.a)||5, h=(d&&d.h)||6;
+  const sa=0.5+(a/18), sh=0.45+(h/20);
+  const B=72*sa, H=145*sh;
+  const cx=140, topY=30, baseY=topY+H, halfB=B*0.52;
   return `<svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="pyL" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ce93d8"/><stop offset="100%" stop-color="#ab47bc"/></linearGradient>
       <linearGradient id="pyR" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8e24aa"/><stop offset="100%" stop-color="#6a1b9a"/></linearGradient>
-      <linearGradient id="pyBase" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#e1bee7"/><stop offset="100%" stop-color="#ce93d8"/></linearGradient>
+      <linearGradient id="pyBs" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#e1bee7"/><stop offset="100%" stop-color="#ce93d8"/></linearGradient>
     </defs>
-    <ellipse cx="140" cy="208" rx="58" ry="11" fill="rgba(0,0,0,.08)"/>
-    <polygon points="140,32 68,178 140,198 212,178" fill="url(#pyBase)" stroke="#4a148c" stroke-width="2.5" stroke-linejoin="round"/>
-    <polygon points="140,32 68,178 140,158" fill="url(#pyL)" stroke="#4a148c" stroke-width="2.5" stroke-linejoin="round"/>
-    <polygon points="140,32 140,158 212,178" fill="url(#pyR)" stroke="#4a148c" stroke-width="2.5" stroke-linejoin="round"/>
-    <polygon points="140,32 104,145 130,155" fill="#fff" opacity=".22"/>
-    <circle cx="140" cy="32" r="3.5" fill="#fff" opacity=".7"/>
-    <line x1="68" y1="178" x2="212" y2="178" stroke="#4a148c" stroke-width="1" opacity=".3"/>
-    <line x1="140" y1="158" x2="140" y2="198" stroke="#4a148c" stroke-width="1" opacity=".3"/>
-    <text x="140" y="230" text-anchor="middle" font-size="13" font-family="Baloo 2" fill="#6a1b9a" opacity=".6">四棱锥</text>
+    <ellipse cx="${cx}" cy="${baseY+10}" rx="${B*0.72}" ry="${11*sa}" fill="rgba(0,0,0,.08)"/>
+    <polygon points="${cx},${topY} ${cx-halfB},${baseY-B*0.12} ${cx},${baseY} ${cx+halfB},${baseY-B*0.12}" fill="url(#pyBs)" stroke="#4a148c" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="${cx},${topY} ${cx-halfB},${baseY-B*0.12} ${cx},${baseY-H*0.28}" fill="url(#pyL)" stroke="#4a148c" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="${cx},${topY} ${cx},${baseY-H*0.28} ${cx+halfB},${baseY-B*0.12}" fill="url(#pyR)" stroke="#4a148c" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="${cx},${topY} ${cx-halfB*0.55},${topY+H*0.7} ${cx-halfB*0.2},${topY+H*0.78}" fill="#fff" opacity=".22"/>
+    <circle cx="${cx}" cy="${topY}" r="3.5" fill="#fff" opacity=".7"/>
+    <text x="${cx-halfB-8}" y="${baseY-B*0.12+18}" font-size="${12*sa}" font-family="Baloo 2,sans-serif" fill="#6a1b9a" font-weight="700">a=${a}</text>
+    <text x="${cx+halfB+8}" y="${topY+H*0.4}" font-size="${12*sh}" font-family="Baloo 2,sans-serif" fill="#6a1b9a" font-weight="700">h=${h}</text>
   </svg>`;
 }
-
 </script>
 </body>
 </html>
