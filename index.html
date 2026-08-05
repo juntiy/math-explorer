@@ -2012,524 +2012,58 @@ function fracStep(){
 
 /* init */
 show('home');
-</script>
-</body>
-</html>
-function scaleWrap(k,inner){ return `<div class="scaleWrap" style="transform:scale(${k})">${inner}</div>`; }
-function buildGeo3dBtns(){
-  const box=$('geo3dBtns'); if(box.dataset.b) return; box.dataset.b='1';
-  Object.keys(GEO3D).forEach(k=>{ const b=document.createElement('button'); b.textContent=GEO3D[k].name; b.dataset.t=k; b.className='shape-btn'; b.onclick=()=>setGeo3d(k); box.appendChild(b); });
+/* ===== 立体图形卡通插画（透视风 SVG）===== */
+function svgCube(){
+  return `<svg viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="70,80 140,80 175,55 105,55" fill="#ffe7a8" stroke="#3a2f1a" stroke-width="3" stroke-linejoin="round"/>
+    <polygon points="140,80 175,55 175,125 140,150" fill="#f0a93f" stroke="#3a2f1a" stroke-width="3" stroke-linejoin="round"/>
+    <rect x="70" y="80" width="70" height="70" fill="#ffce5c" stroke="#3a2f1a" stroke-width="3"/>
+    <ellipse cx="93" cy="105" rx="9" ry="22" fill="#ffffff" opacity="0.35"/>
+  </svg>`;
 }
-function setGeo3d(t){
-  buildGeo3dBtns();
-  geo3dType=t;
-  document.querySelectorAll('#geo3dBtns button').forEach(b=> b.classList.toggle('on', b.dataset.t===t));
-  buildGeo3dInputs(); drawGeo3d();
+function svgCuboid(){
+  return `<svg viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="55,85 145,85 185,55 95,55" fill="#cdf3ff" stroke="#1f4a6b" stroke-width="3" stroke-linejoin="round"/>
+    <polygon points="145,85 185,55 185,120 145,150" fill="#5cc6f0" stroke="#1f4a6b" stroke-width="3" stroke-linejoin="round"/>
+    <rect x="55" y="85" width="90" height="65" fill="#9be7ff" stroke="#1f4a6b" stroke-width="3"/>
+    <ellipse cx="80" cy="115" rx="9" ry="22" fill="#ffffff" opacity="0.3"/>
+  </svg>`;
 }
-function buildGeo3dInputs(){
-  const cfg=GEO3D[geo3dType], wrap=$('geo3dInputs'); wrap.innerHTML='';
-  cfg.inputs.forEach(inp=>{ wrap.innerHTML+=`<label class="ctrl">${inp.label} <span id="g3_${inp.k}" class="num">${inp.def}</span><input type="range" min="${inp.min}" max="${inp.max}" value="${inp.def}" oninput="onGeo3d('${inp.k}',this.value)"></label>`; });
+function svgCylinder(){
+  return `<svg viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
+    <path d="M60,60 L60,150 A50,14 0 0 1 160,150 L160,60 Z" fill="#7ec8ff" stroke="#1f4a6b" stroke-width="3" stroke-linejoin="round"/>
+    <ellipse cx="110" cy="60" rx="50" ry="14" fill="#cdeeff" stroke="#1f4a6b" stroke-width="3"/>
+    <ellipse cx="84" cy="104" rx="8" ry="34" fill="#ffffff" opacity="0.32"/>
+  </svg>`;
 }
-function onGeo3d(k,v){ $('g3_'+k).textContent=v; drawGeo3d(); }
-function drawGeo3d(){
-  const cfg=GEO3D[geo3dType], d={}; cfg.inputs.forEach(inp=> d[inp.k]=+$('g3_'+inp.k).textContent);
-  const res=cfg.calc(d);
-  $('geo3dStage').innerHTML=cfg.html(d);
-  $('geo3dFormula').innerHTML=res.formula;
-  $('geo3dExplain').innerHTML=res.explain+`<div style="margin-top:6px">`+cfg.inputs.map(inp=>`<span class="solid-tag">${inp.label}=<b>${d[inp.k]}</b></span>`).join('')+`</div>`;
+function svgCone(){
+  return `<svg viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
+    <path d="M50,150 L110,40 L170,150 Z" fill="#ffb86b" stroke="#9a5a1a" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M50,150 A60,15 0 0 0 170,150" fill="none" stroke="#9a5a1a" stroke-width="3"/>
+    <ellipse cx="110" cy="150" rx="60" ry="15" fill="#ffd2a3" stroke="#9a5a1a" stroke-width="3"/>
+    <polygon points="110,52 78,146 98,150" fill="#ffffff" opacity="0.22"/>
+  </svg>`;
 }
-function geoInit(){ setGeo2d('square'); setGeo3d('cube'); drawPi(); }
-/* ---------- 发现规律 Patterns ---------- */
-let actx;
-function sfx(type){
-  try{
-    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
-    const o=actx.createOscillator(), g=actx.createGain();
-    o.connect(g); g.connect(actx.destination);
-    const map={ok:[660,0.12],fold:[520,0.18],prime:[880,0.22]};
-    const [f,d]=map[type]||map.ok;
-    o.frequency.value=f; o.type='sine'; g.gain.value=0.06;
-    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+d); o.stop(actx.currentTime+d);
-  }catch(e){}
+function svgSphere(){
+  return `<svg viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
+    <defs><radialGradient id="sphGrad" cx="38%" cy="32%" r="75%">
+      <stop offset="0%" stop-color="#bfe9ff"/>
+      <stop offset="55%" stop-color="#5bb8f5"/>
+      <stop offset="100%" stop-color="#1f7fd0"/>
+    </radialGradient></defs>
+    <circle cx="110" cy="100" r="72" fill="url(#sphGrad)" stroke="#1f5e9e" stroke-width="3"/>
+    <ellipse cx="86" cy="74" rx="20" ry="13" fill="#ffffff" opacity="0.5"/>
+  </svg>`;
 }
-function setPatTab(t){
-  document.querySelectorAll('.pat-tab').forEach(b=> b.classList.toggle('on', b.dataset.t===t));
-  document.querySelectorAll('.pat-panel').forEach(p=> p.classList.toggle('on', p.id==='pat-'+t));
-  if(t==='m3') buildMTable();
-  if(t==='m2') gaussRender();
-}
-
-/* 模块1-1：自动排队（因数 / 质数 / 三角数） */
-function autoArrange(){
-  const n = Math.max(1, Math.min(144, +$('patNum').value||12));
-  const pairs = [];
-  for(let a=1; a*a<=n; a++){ if(n%a===0) pairs.push([a, n/a]); }
-  const out = $('arrOut'); out.innerHTML='';
-  pairs.forEach((p,idx)=>{
-    const [a,b]=p;
-    const card=document.createElement('div'); card.className='arr-card';
-    card.innerHTML=`<div class="arr-cap">${a} × ${b} = ${n}</div>`;
-    const grid=document.createElement('div'); grid.className='arr-grid';
-    for(let r=0;r<a;r++){
-      const row=document.createElement('div'); row.className='arr-row';
-      for(let c=0;c<b;c++){ const u=document.createElement('div'); u.className='ucube c'+((idx%6)+1); row.appendChild(u); }
-      grid.appendChild(row);
-    }
-    card.appendChild(grid); out.appendChild(card);
-  });
-  const isPrime = pairs.length===1;
-  const triK = (Math.sqrt(8*n+1)-1)/2;
-  const isTri = Math.abs(triK-Math.round(triK))<1e-9;
-  let note = `数字 <b>${n}</b> 能拼出 <b>${pairs.length}</b> 种长方形`;
-  if(isPrime) note += `。咦？除了排成 <b>1 × ${n}</b> 的长条，别的都拼不出来——这就是<b>质数</b>：只能被 1 和自己整除！`;
-  else note += `。每一种长方形都对应一对<b>因数</b>，也就是乘法（${pairs.map(p=>p.join('×')).join('、')}）。`;
-  if(isTri) note += ` 而且它还是<b>三角形数</b>（能排成三角形）哦～`;
-  $('arrNote').innerHTML = note;
-  sfx(isPrime?'prime':'ok'); earn('pattern');
+function svgPyramid(){
+  return `<svg viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="55,150 110,172 110,35" fill="#d9c2ff" stroke="#5a3f9e" stroke-width="3" stroke-linejoin="round"/>
+    <polygon points="110,172 165,150 110,35" fill="#b08cff" stroke="#5a3f9e" stroke-width="3" stroke-linejoin="round"/>
+    <polygon points="55,150 110,128 165,150 110,172" fill="none" stroke="#5a3f9e" stroke-width="3" stroke-linejoin="round"/>
+    <polygon points="110,35 110,172 80,160" fill="#ffffff" opacity="0.18"/>
+  </svg>`;
 }
 
-/* 模块1-2：奇数相加变正方形 */
-let oddSide = 0;
-const oddColors = ['#ff6b6b','#ff9f43','#4d96ff','#18c2b8','#9b6bff','#ff6ba6','#2ecc71','#ffd23f'];
-function oddReset(){ oddSide=0; $('oddOut').innerHTML=''; $('oddFb').textContent=''; }
-function oddStep(){
-  if(oddSide>=9){ toast('已经叠到 9×9 啦，先重置再玩～'); return; }
-  oddSide++;
-  const out=$('oddOut'); out.innerHTML='';
-  const grid=document.createElement('div'); grid.className='grid';
-  grid.style.gridTemplateColumns=`repeat(${oddSide},1fr)`;
-  grid.style.maxWidth=(oddSide*30)+'px';
-  for(let r=0;r<oddSide;r++){
-    for(let c=0;c<oddSide;c++){
-      const cell=document.createElement('div'); cell.className='oddcell';
-      cell.style.background=oddColors[Math.max(r,c)%oddColors.length];
-      cell.style.animationDelay=(Math.max(r,c)*0.04)+'s';
-      grid.appendChild(cell);
-    }
-  }
-  out.appendChild(grid);
-  const total=oddSide*oddSide, added=oddSide*2-1;
-  $('oddFb').innerHTML = (oddSide>=2? `1 + 3 + 5 + … + <b>${added}</b> = ` : `1 = `) + `<b>${total}</b>（${oddSide}×${oddSide} 正方形）`;
-  sfx('ok'); earn('pattern');
-}
-
-
-/* 模块2：高斯求和 —— 配对法 + 拼长方形法 */
-let gaussMode='pair';
-function gaussN(){ return Math.max(1, Math.min(100, +$('gaussN').value||10)); }
-function setGaussMode(m){
-  gaussMode=m;
-  $('gaussSegPair').classList.toggle('on', m==='pair');
-  $('gaussSegRect').classList.toggle('on', m==='rect');
-  $('gaussPlayBtn').textContent = m==='rect' ? '✨ 拼合！' : '✨ 配对！';
-  gaussRender();
-}
-function gaussRender(){ if(gaussMode==='rect') gaussRectStatic(); else gaussPairStatic(); }
-function gaussPlay(){ if(gaussMode==='rect') gaussRectPlay(); else gaussPairPlay(); }
-function gaussReset(){ gaussRender(); }
-
-/* —— 拼长方形法 —— */
-function gaussRectStatic(){
-  const N=gaussN(), total=N*(N+1)/2, stage=$('gaussStage'); stage.innerHTML='';
-  if(N>24){
-    stage.innerHTML='<div class="gauss-placeholder">🪜</div>';
-    $('gaussCap').innerHTML='N 太大啦，直接用公式：1+…+'+N+' = '+N+'×'+(N+1)+'÷2 = <b>'+total+'</b>。把 N 调到 24 以内看动画～';
-    $('gaussFb').innerHTML=''; return;
-  }
-  const wrap=document.createElement('div'); wrap.className='gauss-rect-wrap';
-  const rowFlex=document.createElement('div'); rowFlex.style.cssText='display:flex;align-items:center;gap:8px';
-  const vlabel=document.createElement('div'); vlabel.className='gauss-rlabel'; vlabel.textContent='⬇ '+N+' 行';
-  const rect=document.createElement('div'); rect.className='gauss-rect'; rect.style.gridTemplateColumns='repeat('+(N+1)+',16px)';
-  for(let r=0;r<N;r++){
-    for(let c=0;c<=N;c++){
-      const cell=document.createElement('div'); cell.className='cell '+(c<=r?'a':'b');
-      if(c>r) cell.style.transitionDelay=((c+r)*12)+'ms';
-      rect.appendChild(cell);
-    }
-  }
-  rowFlex.appendChild(vlabel); rowFlex.appendChild(rect);
-  const hlabel=document.createElement('div'); hlabel.className='gauss-rlabel b'; hlabel.textContent='➡ '+(N+1)+' 列（每份多 1）';
-  wrap.appendChild(rowFlex); wrap.appendChild(hlabel); stage.appendChild(wrap);
-  $('gaussCap').innerHTML='👈 这是 <b>1 份</b>阶梯（1+2+…+'+N+'）。点「拼合！」复制一份旋转 180° 补到右上方，拼成长方形。';
-  $('gaussFb').innerHTML='';
-}
-function gaussRectPlay(){
-  const N=gaussN(), total=N*(N+1)/2, area=N*(N+1);
-  gaussRectStatic();
-  if(N>24){ $('gaussFb').innerHTML='长方形 = <b>'+area+'</b> 格 = 两份 1+2+…+'+N+'，所以 1 份 = '+area+' ÷ 2 = <b>'+total+'</b>。'; return; }
-  const rect=$('gaussStage').querySelector('.gauss-rect');
-  if(rect) requestAnimationFrame(function(){ rect.classList.add('show'); });
-  $('gaussCap').innerHTML='✅ 两份拼成 <b>'+N+' 行 × '+(N+1)+' 列</b> 的长方形，共 <b>'+area+'</b> 格。';
-  $('gaussFb').innerHTML='长方形有 <b>'+area+'</b> 格 = <b>两份</b> 1+2+…+'+N+'，所以 1 份 = '+area+' ÷ 2 = <b>'+N+' × '+(N+1)+' ÷ 2 = '+total+'</b>。';
-  sfx('fold'); earn('pattern');
-}
-
-/* —— 配对法（高斯原法） —— */
-function gaussPairStatic(){
-  const N=gaussN(), total=N*(N+1)/2, stage=$('gaussStage'); stage.innerHTML='';
-  if(N>80){
-    stage.innerHTML='<div class="gauss-placeholder">🔢</div>';
-    $('gaussCap').innerHTML='N 太大，直接用公式：1+…+'+N+' = '+N+'×'+(N+1)+'÷2 = <b>'+total+'</b>。';
-    $('gaussFb').innerHTML=''; return;
-  }
-  const wrap=document.createElement('div'); wrap.className='gauss-pair';
-  for(let i=1;i<=N;i++){ const chip=document.createElement('div'); chip.className='gauss-chip'; chip.textContent=i; wrap.appendChild(chip); }
-  stage.appendChild(wrap);
-  $('gaussCap').innerHTML='👈 把 1 到 '+N+' 排成一排。点「配对！」让头尾两两配对。';
-  $('gaussFb').innerHTML='';
-}
-function gaussPairPlay(){
-  const N=gaussN(), total=N*(N+1)/2, mid=(N%2===1)?(N+1)/2:0, P=Math.floor(N/2);
-  if(N>80){ gaussPairStatic(); return; }
-  const stage=$('gaussStage'); stage.innerHTML='';
-  const wrap=document.createElement('div'); wrap.className='gauss-pair';
-  for(let k=1;k<=P;k++){
-    const grp=document.createElement('div'); grp.className='pair-grp'; grp.style.transitionDelay=((k-1)*60)+'ms';
-    const top=document.createElement('div'); top.className='pair-top';
-    const c1=document.createElement('div'); c1.className='gauss-chip'; c1.textContent=k;
-    const plus=document.createElement('div'); plus.className='pair-plus'; plus.textContent='+';
-    const c2=document.createElement('div'); c2.className='gauss-chip'; c2.textContent=N+1-k;
-    top.appendChild(c1); top.appendChild(plus); top.appendChild(c2);
-    const sum=document.createElement('div'); sum.className='pair-sum'; sum.textContent='='+(N+1);
-    grp.appendChild(top); grp.appendChild(sum); wrap.appendChild(grp);
-  }
-  if(mid){
-    const grp=document.createElement('div'); grp.className='pair-grp'; grp.style.transitionDelay=(P*60)+'ms';
-    const top=document.createElement('div'); top.className='pair-top';
-    const c=document.createElement('div'); c.className='gauss-chip mid'; c.textContent=mid;
-    top.appendChild(c);
-    const sum=document.createElement('div'); sum.className='pair-sum mid'; sum.textContent='中间';
-    grp.appendChild(top); grp.appendChild(sum); wrap.appendChild(grp);
-  }
-  stage.appendChild(wrap);
-  requestAnimationFrame(function(){ wrap.classList.add('show'); });
-  $('gaussCap').innerHTML='✅ 头尾配对：每对都 = <b>'+(N+1)+'</b>，共 <b>'+P+'</b> 对'+(mid?(' + 1 个中间数 '+mid):'')+'。';
-  if(mid){
-    $('gaussFb').innerHTML='<b>'+P+'</b> 对 × '+(N+1)+' + 中间 '+mid+' = <b>'+total+'</b>。也就是 (N−1)/2 × (N+1) + (N+1)/2。';
-  } else {
-    $('gaussFb').innerHTML='<b>'+P+'</b> 对 × '+(N+1)+' = <b>'+total+'</b>。这就是「÷2」的来历：N 个数配成 N/2 对！';
-  }
-  sfx('fold'); earn('pattern');
-}
-
-/* 模块3：乘法热力地图 + 神奇9 + 模环 */
-function buildMTable(){
-  const out=$('mtOut'); if(!out) return; out.innerHTML='';
-  for(let r=1;r<=12;r++){
-    for(let c=1;c<=12;c++){
-      const v=r*c, bar=document.createElement('div'); bar.className='mtbar';
-      bar.style.height=Math.max(6,(v/144)*58)+'px';
-      const hue=205-(v/144)*205;
-      bar.style.background=`hsl(${hue},70%,${58-(v/144)*14}%)`;
-      bar.title=`${r} × ${c} = ${v}`;
-      bar.textContent = v<=18 ? v : '';
-      out.appendChild(bar);
-    }
-  }
-}
-function magic9(){
-  const out=$('magic9Out'); let html='<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
-  for(let k=1;k<=10;k++){
-    const v=9*k, t=Math.floor(v/10), o=v%10, s=t+o;
-    html+=`<div class="arr-card" style="text-align:center;min-width:96px"><div class="num" style="font-size:22px;color:var(--purple)">${v}</div><div style="font-size:13px;color:var(--ink-soft)">${t} + ${o} = <b style="color:var(--red)">${s}</b></div></div>`;
-  }
-  html+='</div><div class="explain">9 的倍数，把十位和个位加起来，永远等于 <b>9</b>！这就是“数字根（digital root）”的小魔法。</div>';
-  out.innerHTML=html; sfx('ok'); earn('pattern');
-}
-function modCircle(m){
-  const svg=$('modSvg'); const cx=110, cy=110, R=88;
-  let s=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="#fbfcff" stroke="#e3e8f7"/>`;
-  const pts=[];
-  for(let i=0;i<10;i++){ const a=(-90+i*36)*Math.PI/180; pts.push([cx+R*Math.cos(a), cy+R*Math.sin(a)]); }
-  for(let i=0;i<10;i++){ s+=`<circle cx="${pts[i][0]}" cy="${pts[i][1]}" r="13" fill="#fff" stroke="#7c5cff"/><text x="${pts[i][0]}" y="${pts[i][1]+4}" text-anchor="middle" font-size="13" font-family="Baloo 2" fill="#2b2d42">${i}</text>`; }
-  let cur=0; let d=`M ${pts[0][0]} ${pts[0][1]}`; const seq=[0];
-  for(let i=0;i<10;i++){ cur=(cur+m)%10; seq.push(cur); d+=` L ${pts[cur][0]} ${pts[cur][1]}`; }
-  s+=`<path d="${d}" fill="none" stroke="#ff6ba6" stroke-width="3" stroke-linejoin="round"/>`;
-  svg.innerHTML=s;
-  $('modFb').innerHTML=`从 0 开始，每次跳 <b>${m}</b> 步（${seq.join(' → ')}），连出的图案竟然这么对称！这就是“模运算”的循环美。`;
-  sfx('ok'); earn('pattern');
-}
-
-/* 模块4：分数极限 1/2 + 1/4 + ... = 1 */
-let fracStepN=0, fracRemain={x:0,y:0,w:320,h:320};
-const fracColors=['#7c5cff','#4d96ff','#18c2b8','#ff9f43','#ff6ba6','#2ecc71','#ff6b6b','#9b6bff','#ffd23f','#c79bff'];
-function fracReset(){ fracStepN=0; fracRemain={x:0,y:0,w:320,h:320}; const sq=$('fracSq'); if(sq) sq.innerHTML=''; $('fracFb').textContent='点“再加一半”，看小方块怎么慢慢填满整个正方形～'; }
-function fracStep(){
-  if(fracStepN>=10){ toast('已经加到 1/1024 啦，总和≈1，先重置～'); return; }
-  fracStepN++;
-  const r=fracRemain; let fill, newRem;
-  if(fracStepN%2===1){ fill={x:r.x,y:r.y,w:r.w/2,h:r.h}; newRem={x:r.x+r.w/2,y:r.y,w:r.w/2,h:r.h}; }
-  else { fill={x:r.x,y:r.y,w:r.w,h:r.h/2}; newRem={x:r.x,y:r.y+r.h/2,w:r.w,h:r.h/2}; }
-  fracRemain=newRem;
-  const d=document.createElement('div'); d.className='fracfill';
-  d.style.cssText=`left:${fill.x}px;top:${fill.y}px;width:${fill.w}px;height:${fill.h}px;background:${fracColors[(fracStepN-1)%fracColors.length]};opacity:.82`;
-  $('fracSq').appendChild(d);
-  const sum=1-1/Math.pow(2,fracStepN);
-  $('fracFb').innerHTML=`刚加了 <b>1/${Math.pow(2,fracStepN)}</b> → 总和 = <b>${sum.toFixed(6)}</b>（还差 ${ (1/Math.pow(2,fracStepN)).toFixed(6) } 才到 1）。不管加多少次，都<b>永远在 1 以内</b>！`;
-  sfx('ok'); earn('pattern');
-}
-
-/* init */
-show('home');
-</script>
-</body>
-</html>
-function scaleWrap(k,inner){ return `<div class="scaleWrap" style="transform:scale(${k})">${inner}</div>`; }
-function buildGeo3dBtns(){
-  const box=$('geo3dBtns'); if(box.dataset.b) return; box.dataset.b='1';
-  Object.keys(GEO3D).forEach(k=>{ const b=document.createElement('button'); b.textContent=GEO3D[k].name; b.dataset.t=k; b.className='shape-btn'; b.onclick=()=>setGeo3d(k); box.appendChild(b); });
-}
-function setGeo3d(t){
-  buildGeo3dBtns();
-  geo3dType=t;
-  document.querySelectorAll('#geo3dBtns button').forEach(b=> b.classList.toggle('on', b.dataset.t===t));
-  buildGeo3dInputs(); drawGeo3d();
-}
-function buildGeo3dInputs(){
-  const cfg=GEO3D[geo3dType], wrap=$('geo3dInputs'); wrap.innerHTML='';
-  cfg.inputs.forEach(inp=>{ wrap.innerHTML+=`<label class="ctrl">${inp.label} <span id="g3_${inp.k}" class="num">${inp.def}</span><input type="range" min="${inp.min}" max="${inp.max}" value="${inp.def}" oninput="onGeo3d('${inp.k}',this.value)"></label>`; });
-}
-function onGeo3d(k,v){ $('g3_'+k).textContent=v; drawGeo3d(); }
-function drawGeo3d(){
-  const cfg=GEO3D[geo3dType], d={}; cfg.inputs.forEach(inp=> d[inp.k]=+$('g3_'+inp.k).textContent);
-  const res=cfg.calc(d);
-  $('geo3dStage').innerHTML=cfg.html(d);
-  $('geo3dFormula').innerHTML=res.formula;
-  $('geo3dExplain').innerHTML=res.explain+`<div style="margin-top:6px">`+cfg.inputs.map(inp=>`<span class="solid-tag">${inp.label}=<b>${d[inp.k]}</b></span>`).join('')+`</div>`;
-}
-function geoInit(){ setGeo2d('square'); setGeo3d('cube'); drawPi(); }
-/* ---------- 发现规律 Patterns ---------- */
-let actx;
-function sfx(type){
-  try{
-    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
-    const o=actx.createOscillator(), g=actx.createGain();
-    o.connect(g); g.connect(actx.destination);
-    const map={ok:[660,0.12],fold:[520,0.18],prime:[880,0.22]};
-    const [f,d]=map[type]||map.ok;
-    o.frequency.value=f; o.type='sine'; g.gain.value=0.06;
-    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+d); o.stop(actx.currentTime+d);
-  }catch(e){}
-}
-function setPatTab(t){
-  document.querySelectorAll('.pat-tab').forEach(b=> b.classList.toggle('on', b.dataset.t===t));
-  document.querySelectorAll('.pat-panel').forEach(p=> p.classList.toggle('on', p.id==='pat-'+t));
-  if(t==='m3') buildMTable();
-  if(t==='m2') gaussRender();
-}
-
-/* 模块1-1：自动排队（因数 / 质数 / 三角数） */
-function autoArrange(){
-  const n = Math.max(1, Math.min(144, +$('patNum').value||12));
-  const pairs = [];
-  for(let a=1; a*a<=n; a++){ if(n%a===0) pairs.push([a, n/a]); }
-  const out = $('arrOut'); out.innerHTML='';
-  pairs.forEach((p,idx)=>{
-    const [a,b]=p;
-    const card=document.createElement('div'); card.className='arr-card';
-    card.innerHTML=`<div class="arr-cap">${a} × ${b} = ${n}</div>`;
-    const grid=document.createElement('div'); grid.className='arr-grid';
-    for(let r=0;r<a;r++){
-      const row=document.createElement('div'); row.className='arr-row';
-      for(let c=0;c<b;c++){ const u=document.createElement('div'); u.className='ucube c'+((idx%6)+1); row.appendChild(u); }
-      grid.appendChild(row);
-    }
-    card.appendChild(grid); out.appendChild(card);
-  });
-  const isPrime = pairs.length===1;
-  const triK = (Math.sqrt(8*n+1)-1)/2;
-  const isTri = Math.abs(triK-Math.round(triK))<1e-9;
-  let note = `数字 <b>${n}</b> 能拼出 <b>${pairs.length}</b> 种长方形`;
-  if(isPrime) note += `。咦？除了排成 <b>1 × ${n}</b> 的长条，别的都拼不出来——这就是<b>质数</b>：只能被 1 和自己整除！`;
-  else note += `。每一种长方形都对应一对<b>因数</b>，也就是乘法（${pairs.map(p=>p.join('×')).join('、')}）。`;
-  if(isTri) note += ` 而且它还是<b>三角形数</b>（能排成三角形）哦～`;
-  $('arrNote').innerHTML = note;
-  sfx(isPrime?'prime':'ok'); earn('pattern');
-}
-
-/* 模块1-2：奇数相加变正方形 */
-let oddSide = 0;
-const oddColors = ['#ff6b6b','#ff9f43','#4d96ff','#18c2b8','#9b6bff','#ff6ba6','#2ecc71','#ffd23f'];
-function oddReset(){ oddSide=0; $('oddOut').innerHTML=''; $('oddFb').textContent=''; }
-function oddStep(){
-  if(oddSide>=9){ toast('已经叠到 9×9 啦，先重置再玩～'); return; }
-  oddSide++;
-  const out=$('oddOut'); out.innerHTML='';
-  const grid=document.createElement('div'); grid.className='grid';
-  grid.style.gridTemplateColumns=`repeat(${oddSide},1fr)`;
-  grid.style.maxWidth=(oddSide*30)+'px';
-  for(let r=0;r<oddSide;r++){
-    for(let c=0;c<oddSide;c++){
-      const cell=document.createElement('div'); cell.className='oddcell';
-      cell.style.background=oddColors[Math.max(r,c)%oddColors.length];
-      cell.style.animationDelay=(Math.max(r,c)*0.04)+'s';
-      grid.appendChild(cell);
-    }
-  }
-  out.appendChild(grid);
-  const total=oddSide*oddSide, added=oddSide*2-1;
-  $('oddFb').innerHTML = (oddSide>=2? `1 + 3 + 5 + … + <b>${added}</b> = ` : `1 = `) + `<b>${total}</b>（${oddSide}×${oddSide} 正方形）`;
-  sfx('ok'); earn('pattern');
-}
-
-
-/* 模块2：高斯求和 —— 配对法 + 拼长方形法 */
-let gaussMode='pair';
-function gaussN(){ return Math.max(1, Math.min(100, +$('gaussN').value||10)); }
-function setGaussMode(m){
-  gaussMode=m;
-  $('gaussSegPair').classList.toggle('on', m==='pair');
-  $('gaussSegRect').classList.toggle('on', m==='rect');
-  $('gaussPlayBtn').textContent = m==='rect' ? '✨ 拼合！' : '✨ 配对！';
-  gaussRender();
-}
-function gaussRender(){ if(gaussMode==='rect') gaussRectStatic(); else gaussPairStatic(); }
-function gaussPlay(){ if(gaussMode==='rect') gaussRectPlay(); else gaussPairPlay(); }
-function gaussReset(){ gaussRender(); }
-
-/* —— 拼长方形法 —— */
-function gaussRectStatic(){
-  const N=gaussN(), total=N*(N+1)/2, stage=$('gaussStage'); stage.innerHTML='';
-  if(N>24){
-    stage.innerHTML='<div class="gauss-placeholder">🪜</div>';
-    $('gaussCap').innerHTML='N 太大啦，直接用公式：1+…+'+N+' = '+N+'×'+(N+1)+'÷2 = <b>'+total+'</b>。把 N 调到 24 以内看动画～';
-    $('gaussFb').innerHTML=''; return;
-  }
-  const wrap=document.createElement('div'); wrap.className='gauss-rect-wrap';
-  const rowFlex=document.createElement('div'); rowFlex.style.cssText='display:flex;align-items:center;gap:8px';
-  const vlabel=document.createElement('div'); vlabel.className='gauss-rlabel'; vlabel.textContent='⬇ '+N+' 行';
-  const rect=document.createElement('div'); rect.className='gauss-rect'; rect.style.gridTemplateColumns='repeat('+(N+1)+',16px)';
-  for(let r=0;r<N;r++){
-    for(let c=0;c<=N;c++){
-      const cell=document.createElement('div'); cell.className='cell '+(c<=r?'a':'b');
-      if(c>r) cell.style.transitionDelay=((c+r)*12)+'ms';
-      rect.appendChild(cell);
-    }
-  }
-  rowFlex.appendChild(vlabel); rowFlex.appendChild(rect);
-  const hlabel=document.createElement('div'); hlabel.className='gauss-rlabel b'; hlabel.textContent='➡ '+(N+1)+' 列（每份多 1）';
-  wrap.appendChild(rowFlex); wrap.appendChild(hlabel); stage.appendChild(wrap);
-  $('gaussCap').innerHTML='👈 这是 <b>1 份</b>阶梯（1+2+…+'+N+'）。点「拼合！」复制一份旋转 180° 补到右上方，拼成长方形。';
-  $('gaussFb').innerHTML='';
-}
-function gaussRectPlay(){
-  const N=gaussN(), total=N*(N+1)/2, area=N*(N+1);
-  gaussRectStatic();
-  if(N>24){ $('gaussFb').innerHTML='长方形 = <b>'+area+'</b> 格 = 两份 1+2+…+'+N+'，所以 1 份 = '+area+' ÷ 2 = <b>'+total+'</b>。'; return; }
-  const rect=$('gaussStage').querySelector('.gauss-rect');
-  if(rect) requestAnimationFrame(function(){ rect.classList.add('show'); });
-  $('gaussCap').innerHTML='✅ 两份拼成 <b>'+N+' 行 × '+(N+1)+' 列</b> 的长方形，共 <b>'+area+'</b> 格。';
-  $('gaussFb').innerHTML='长方形有 <b>'+area+'</b> 格 = <b>两份</b> 1+2+…+'+N+'，所以 1 份 = '+area+' ÷ 2 = <b>'+N+' × '+(N+1)+' ÷ 2 = '+total+'</b>。';
-  sfx('fold'); earn('pattern');
-}
-
-/* —— 配对法（高斯原法） —— */
-function gaussPairStatic(){
-  const N=gaussN(), total=N*(N+1)/2, stage=$('gaussStage'); stage.innerHTML='';
-  if(N>80){
-    stage.innerHTML='<div class="gauss-placeholder">🔢</div>';
-    $('gaussCap').innerHTML='N 太大，直接用公式：1+…+'+N+' = '+N+'×'+(N+1)+'÷2 = <b>'+total+'</b>。';
-    $('gaussFb').innerHTML=''; return;
-  }
-  const wrap=document.createElement('div'); wrap.className='gauss-pair';
-  for(let i=1;i<=N;i++){ const chip=document.createElement('div'); chip.className='gauss-chip'; chip.textContent=i; wrap.appendChild(chip); }
-  stage.appendChild(wrap);
-  $('gaussCap').innerHTML='👈 把 1 到 '+N+' 排成一排。点「配对！」让头尾两两配对。';
-  $('gaussFb').innerHTML='';
-}
-function gaussPairPlay(){
-  const N=gaussN(), total=N*(N+1)/2, mid=(N%2===1)?(N+1)/2:0, P=Math.floor(N/2);
-  if(N>80){ gaussPairStatic(); return; }
-  const stage=$('gaussStage'); stage.innerHTML='';
-  const wrap=document.createElement('div'); wrap.className='gauss-pair';
-  for(let k=1;k<=P;k++){
-    const grp=document.createElement('div'); grp.className='pair-grp'; grp.style.transitionDelay=((k-1)*60)+'ms';
-    const top=document.createElement('div'); top.className='pair-top';
-    const c1=document.createElement('div'); c1.className='gauss-chip'; c1.textContent=k;
-    const plus=document.createElement('div'); plus.className='pair-plus'; plus.textContent='+';
-    const c2=document.createElement('div'); c2.className='gauss-chip'; c2.textContent=N+1-k;
-    top.appendChild(c1); top.appendChild(plus); top.appendChild(c2);
-    const sum=document.createElement('div'); sum.className='pair-sum'; sum.textContent='='+(N+1);
-    grp.appendChild(top); grp.appendChild(sum); wrap.appendChild(grp);
-  }
-  if(mid){
-    const grp=document.createElement('div'); grp.className='pair-grp'; grp.style.transitionDelay=(P*60)+'ms';
-    const top=document.createElement('div'); top.className='pair-top';
-    const c=document.createElement('div'); c.className='gauss-chip mid'; c.textContent=mid;
-    top.appendChild(c);
-    const sum=document.createElement('div'); sum.className='pair-sum mid'; sum.textContent='中间';
-    grp.appendChild(top); grp.appendChild(sum); wrap.appendChild(grp);
-  }
-  stage.appendChild(wrap);
-  requestAnimationFrame(function(){ wrap.classList.add('show'); });
-  $('gaussCap').innerHTML='✅ 头尾配对：每对都 = <b>'+(N+1)+'</b>，共 <b>'+P+'</b> 对'+(mid?(' + 1 个中间数 '+mid):'')+'。';
-  if(mid){
-    $('gaussFb').innerHTML='<b>'+P+'</b> 对 × '+(N+1)+' + 中间 '+mid+' = <b>'+total+'</b>。也就是 (N−1)/2 × (N+1) + (N+1)/2。';
-  } else {
-    $('gaussFb').innerHTML='<b>'+P+'</b> 对 × '+(N+1)+' = <b>'+total+'</b>。这就是「÷2」的来历：N 个数配成 N/2 对！';
-  }
-  sfx('fold'); earn('pattern');
-}
-
-/* 模块3：乘法热力地图 + 神奇9 + 模环 */
-function buildMTable(){
-  const out=$('mtOut'); if(!out) return; out.innerHTML='';
-  for(let r=1;r<=12;r++){
-    for(let c=1;c<=12;c++){
-      const v=r*c, bar=document.createElement('div'); bar.className='mtbar';
-      bar.style.height=Math.max(6,(v/144)*58)+'px';
-      const hue=205-(v/144)*205;
-      bar.style.background=`hsl(${hue},70%,${58-(v/144)*14}%)`;
-      bar.title=`${r} × ${c} = ${v}`;
-      bar.textContent = v<=18 ? v : '';
-      out.appendChild(bar);
-    }
-  }
-}
-function magic9(){
-  const out=$('magic9Out'); let html='<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
-  for(let k=1;k<=10;k++){
-    const v=9*k, t=Math.floor(v/10), o=v%10, s=t+o;
-    html+=`<div class="arr-card" style="text-align:center;min-width:96px"><div class="num" style="font-size:22px;color:var(--purple)">${v}</div><div style="font-size:13px;color:var(--ink-soft)">${t} + ${o} = <b style="color:var(--red)">${s}</b></div></div>`;
-  }
-  html+='</div><div class="explain">9 的倍数，把十位和个位加起来，永远等于 <b>9</b>！这就是“数字根（digital root）”的小魔法。</div>';
-  out.innerHTML=html; sfx('ok'); earn('pattern');
-}
-function modCircle(m){
-  const svg=$('modSvg'); const cx=110, cy=110, R=88;
-  let s=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="#fbfcff" stroke="#e3e8f7"/>`;
-  const pts=[];
-  for(let i=0;i<10;i++){ const a=(-90+i*36)*Math.PI/180; pts.push([cx+R*Math.cos(a), cy+R*Math.sin(a)]); }
-  for(let i=0;i<10;i++){ s+=`<circle cx="${pts[i][0]}" cy="${pts[i][1]}" r="13" fill="#fff" stroke="#7c5cff"/><text x="${pts[i][0]}" y="${pts[i][1]+4}" text-anchor="middle" font-size="13" font-family="Baloo 2" fill="#2b2d42">${i}</text>`; }
-  let cur=0; let d=`M ${pts[0][0]} ${pts[0][1]}`; const seq=[0];
-  for(let i=0;i<10;i++){ cur=(cur+m)%10; seq.push(cur); d+=` L ${pts[cur][0]} ${pts[cur][1]}`; }
-  s+=`<path d="${d}" fill="none" stroke="#ff6ba6" stroke-width="3" stroke-linejoin="round"/>`;
-  svg.innerHTML=s;
-  $('modFb').innerHTML=`从 0 开始，每次跳 <b>${m}</b> 步（${seq.join(' → ')}），连出的图案竟然这么对称！这就是“模运算”的循环美。`;
-  sfx('ok'); earn('pattern');
-}
-
-/* 模块4：分数极限 1/2 + 1/4 + ... = 1 */
-let fracStepN=0, fracRemain={x:0,y:0,w:320,h:320};
-const fracColors=['#7c5cff','#4d96ff','#18c2b8','#ff9f43','#ff6ba6','#2ecc71','#ff6b6b','#9b6bff','#ffd23f','#c79bff'];
-function fracReset(){ fracStepN=0; fracRemain={x:0,y:0,w:320,h:320}; const sq=$('fracSq'); if(sq) sq.innerHTML=''; $('fracFb').textContent='点“再加一半”，看小方块怎么慢慢填满整个正方形～'; }
-function fracStep(){
-  if(fracStepN>=10){ toast('已经加到 1/1024 啦，总和≈1，先重置～'); return; }
-  fracStepN++;
-  const r=fracRemain; let fill, newRem;
-  if(fracStepN%2===1){ fill={x:r.x,y:r.y,w:r.w/2,h:r.h}; newRem={x:r.x+r.w/2,y:r.y,w:r.w/2,h:r.h}; }
-  else { fill={x:r.x,y:r.y,w:r.w,h:r.h/2}; newRem={x:r.x,y:r.y+r.h/2,w:r.w,h:r.h/2}; }
-  fracRemain=newRem;
-  const d=document.createElement('div'); d.className='fracfill';
-  d.style.cssText=`left:${fill.x}px;top:${fill.y}px;width:${fill.w}px;height:${fill.h}px;background:${fracColors[(fracStepN-1)%fracColors.length]};opacity:.82`;
-  $('fracSq').appendChild(d);
-  const sum=1-1/Math.pow(2,fracStepN);
-  $('fracFb').innerHTML=`刚加了 <b>1/${Math.pow(2,fracStepN)}</b> → 总和 = <b>${sum.toFixed(6)}</b>（还差 ${ (1/Math.pow(2,fracStepN)).toFixed(6) } 才到 1）。不管加多少次，都<b>永远在 1 以内</b>！`;
-  sfx('ok'); earn('pattern');
-}
-
-/* init */
-show('home');
 </script>
 </body>
 </html>
