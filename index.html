@@ -136,6 +136,51 @@
   .culture .c{ background:#f7f9ff; border-radius:12px; padding:8px 12px; font-size:14px; text-align:center; }
   .culture .c b{ display:block; font-family:'Baloo 2'; font-size:20px; color:var(--teal); }
   footer{ text-align:center; color:var(--ink-soft); font-size:12px; padding:18px; }
+  /* ---------- 5 模块发现之旅 地图 ---------- */
+  .journey{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; align-items:center; margin:16px 0 4px; }
+  .jstage{ background:#fff; border:2px solid var(--line); border-radius:14px; padding:8px 12px; font-size:13px; display:flex; gap:7px; align-items:center; }
+  .jstage b{ color:var(--purple); }
+  .jarrow{ color:var(--ink-soft); font-size:16px; }
+  /* ---------- 数字诞生：3D 苹果框 + 逢十进一 ---------- */
+  .apple-stage{ display:flex; gap:18px; align-items:flex-end; justify-content:center; flex-wrap:wrap; margin:12px 0; }
+  .apple-box{ width:210px; height:150px; perspective:700px; }
+  .apple-box .shelf{ position:relative; transform-style:preserve-3d; transform:rotateX(10deg); width:210px; height:150px;
+    border:3px solid rgba(124,92,255,.4); border-bottom-width:7px; border-radius:12px;
+    background:linear-gradient(180deg, rgba(124,92,255,.05), rgba(124,92,255,.18));
+    display:flex; flex-wrap:wrap; align-content:flex-end; gap:5px; padding:9px; overflow:hidden; }
+  .apple{ font-size:25px; line-height:1; animation:drop .45s backwards; user-select:none; }
+  @keyframes drop{ 0%{ transform:translateY(-130px) scale(.5) rotate(-20deg); opacity:0;} 60%{ transform:translateY(6px) scale(1.12);} 100%{ transform:translateY(0) scale(1); opacity:1;} }
+  .tens-tray{ text-align:center; }
+  .tens-tray .coins{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; max-width:230px; }
+  .ten-coin{ font-size:30px; animation:pop .35s backwards; }
+  .ten-coin small{ display:block; font-family:'Baloo 2'; font-size:10px; color:var(--orange); }
+  /* ---------- 加减：3D 数轴兔子跳 ---------- */
+  .play-btn{ border:none; background:linear-gradient(90deg,#ff9f43,#ff6b6b); color:#fff; font-family:inherit; font-size:14px; padding:8px 14px; border-radius:12px; cursor:pointer; box-shadow:0 6px 16px rgba(255,111,107,.35); }
+  .play-btn:active{ transform:translateY(1px); }
+  canvas.nl{ cursor:default; }
+  /* ---------- 乘法：线→面 3D 阵列 ---------- */
+  .mul3d-wrap{ text-align:center; perspective:800px; margin:6px 0; }
+  .mul3d{ display:grid; gap:4px; margin:0 auto; max-width:520px; transition:transform .6s cubic-bezier(.4,.1,.3,1); transform-origin:center bottom; }
+  .mul3d.tilt{ transform:rotateX(54deg) rotateZ(0deg); }
+  .mini-cap{ font-size:13px; color:var(--ink-soft); text-align:center; margin:4px 0 10px; }
+  /* ---------- 除法：蛋糕切分 ---------- */
+  .cake-wrap{ text-align:center; margin:10px 0; }
+  /* ---------- 根号：泥块捏塑 ---------- */
+  .clay-area{ display:flex; gap:20px; align-items:center; justify-content:center; flex-wrap:wrap; margin:12px 0; }
+  .clay-grid{ display:grid; gap:3px; }
+  .clay-cell{ width:17px; height:17px; border-radius:4px; background:linear-gradient(135deg,#d8b078,#a9793f); box-shadow:inset 0 -2px 0 rgba(0,0,0,.15); animation:pop .2s backwards; }
+  .clay-cell.off{ background:rgba(120,90,40,.08); box-shadow:none; }
+  .win-badge{ color:var(--green); font-weight:800; font-size:18px; }
+  /* ---------- 奇偶：落单者发光摇晃 ---------- */
+  .pdot.solo{ animation:aloneGlow 1s ease-in-out infinite; }
+  @keyframes aloneGlow{ 0%,100%{ transform:translateY(0) scale(1); box-shadow:0 0 0 0 rgba(255,107,107,.5);} 50%{ transform:translateY(-4px) scale(1.12); box-shadow:0 0 0 7px rgba(255,107,107,0);} }
+  /* ---------- 几何：剪拼 / 圆极限 ---------- */
+  .geo-svg-box{ text-align:center; }
+  .para-tri{ transition:transform .9s cubic-bezier(.5,.05,.3,1); }
+  .para-tri.move{ transform:translateX(64px); }
+  .para-rect{ opacity:0; transition:opacity .4s .6s; }
+  .para-rect.show{ opacity:1; }
+  .sector{ transition:transform .9s cubic-bezier(.5,.05,.3,1); }
   @media (max-width:820px){
     .wrap{ flex-direction:column; }
     .sidebar{ position:static; width:100%; display:flex; overflow-x:auto; gap:6px; }
@@ -184,6 +229,21 @@
         </div>
       </div>
       <div class="card">
+        <h2>🗺️ 数学发现之旅（从易到难，5 站）</h2>
+        <p class="lead">我们沿着一条「发现之路」往前走：先把“东西”变成“数字”，再把数字拿去做加减乘除，然后跨越维度看平方与根号，接着拆解几何图形与面积，最后用奇偶与数论感受数学的规律之美。</p>
+        <div class="journey">
+          <div class="jstage"><span>①</span><b>数字诞生</b><span>物→符号</span></div>
+          <span class="jarrow">→</span>
+          <div class="jstage"><span>②</span><b>加减乘除</b><span>线·面</span></div>
+          <span class="jarrow">→</span>
+          <div class="jstage"><span>③</span><b>平方·根号</b><span>维度跨越</span></div>
+          <span class="jarrow">→</span>
+          <div class="jstage"><span>④</span><b>几何·面积</b><span>剪拼转化</span></div>
+          <span class="jarrow">→</span>
+          <div class="jstage"><span>⑤</span><b>奇偶·数论</b><span>对称规律</span></div>
+        </div>
+      </div>
+      <div class="card">
         <h2>💡 怎么玩</h2>
         <p class="lead">左边选一个展区；很多展区里有滑块和按钮，拖动、点击就能看到数学“动”起来。每弄懂一个，右上角的 ⭐ 就会多一颗——收集满 8 颗，你就是数学小探险家啦！</p>
       </div>
@@ -194,10 +254,19 @@
       <div class="card">
         <span class="badge">数字的产生</span>
         <h2>🔢 数字是怎么来的？</h2>
-        <p class="lead">很久很久以前，人们要数羊、数果子，就用地上的石头、绳子上的结、墙上的刻痕来记。后来，大家约定用“数字符号”来表示数量，记数就方便多了。下面我们一只一只把羊赶过来，看看数量怎么变成数字。</p>
-        <div class="origin-scene" id="originScene"></div>
+        <p class="lead">很久很久以前，人们要数羊、数果子，就用地上的石头、绳子上的结、墙上的刻痕来记。后来，大家约定用“数字符号”来表示数量，记数就方便多了。下面我们把一个个🍎放进框里，看数量怎么“凝结”成数字；再看看满 10 个怎么变成更大的“十位”。</p>
+        <div class="apple-stage">
+          <div>
+            <div class="apple-box"><div class="shelf" id="appleShelf"></div></div>
+            <div class="mini-cap">把苹果放进框里，它们会“凝结”成数字</div>
+          </div>
+          <div class="tens-tray">
+            <div class="coins" id="tensCoins"></div>
+            <div class="mini-cap">每满 10 个 🍎 → 熔成 1 枚 🪙 十位金币</div>
+          </div>
+        </div>
         <div class="controls" style="justify-content:center">
-          <button class="act" onclick="addSheep()">➕ 再来一只羊</button>
+          <button class="act" onclick="addApple()">🍎 再放一个苹果</button>
           <button class="act alt" onclick="resetOrigin()">↺ 重新数</button>
           <span class="tally" id="tallyText">（还没有）</span>
           <span class="num-badge" id="numBadge">0</span>
@@ -216,7 +285,7 @@
       <div class="card">
         <span class="badge">加减法</span>
         <h2>➕ 加和减，就是“合起来”与“拿走”</h2>
-        <p class="lead">加法 = 把两堆东西合在一起；减法 = 从一堆里拿走一些。下面的积木会真的“飞”到一起或“消失”，数轴上的小圆点也会一步步走。</p>
+        <p class="lead">加法 = 把两堆东西合在一起；减法 = 从一堆里拿走一些。下面的积木会真的“飞”到一起或“消失”，数轴上的小兔子也会一步步跳到结果上。</p>
         <div class="controls">
           <div class="ctrl">第一个数 a
             <input class="field num" id="addA" type="number" value="3" min="0" max="20" oninput="updateAdd()">
@@ -234,6 +303,9 @@
         <div class="blocks" id="addBlocks"></div>
         <div class="formula num" id="addFormula"></div>
         <canvas class="nl" id="addLine" width="640" height="150"></canvas>
+        <div class="controls" style="justify-content:center;margin-top:8px">
+          <button class="play-btn" onclick="animateHop()">▶ 看小兔子跳一跳</button>
+        </div>
         <div class="explain" id="addExplain"></div>
       </div>
     </section>
@@ -253,10 +325,16 @@
           </div>
         </div>
         <div class="formula num" id="mulFormula"></div>
-        <div class="grid" id="mulGrid" style="grid-template-columns:repeat(4,1fr)"></div>
+        <div class="controls" style="justify-content:center">
+          <button class="play-btn" onclick="toggleMul3d()">🧊 线 → 面：立体看阵列</button>
+        </div>
+        <div class="mul3d-wrap">
+          <div class="grid mul3d" id="mulGrid" style="grid-template-columns:repeat(4,1fr)"></div>
+        </div>
+        <div class="mini-cap">乘法 = 把 1 维的“行”拉伸成 2 维的“面”：<b id="mulRowsCap">3</b> 行 × <b id="mulColsCap">4</b> 列 = 一个完整的面</div>
         <div class="explain" id="mulExplain"></div>
         <hr style="border:none;border-top:1px dashed var(--line);margin:18px 0">
-        <h2 style="font-size:20px">➗ 除法：平均分一分</h2>
+        <h2 style="font-size:20px">➗ 除法：平均分一分（切蛋糕）</h2>
         <div class="controls">
           <div class="ctrl">总数 <span id="divTotalV" class="num">12</span>
             <input type="range" id="divTotal" min="1" max="30" value="12" oninput="updateDiv()">
@@ -265,6 +343,7 @@
             <input type="range" id="divGroup" min="1" max="10" value="3" oninput="updateDiv()">
           </div>
         </div>
+        <div class="cake-wrap"><svg id="cakeSvg" width="300" height="200" viewBox="0 0 300 200"></svg></div>
         <div class="formula num" id="divFormula"></div>
         <div class="groups" id="divGroups"></div>
         <div class="explain" id="divExplain"></div>
@@ -300,7 +379,11 @@
           </div>
         </div>
         <div class="formula num" id="sqFormula"></div>
+        <div class="controls" style="justify-content:center">
+          <button class="play-btn" onclick="playSquare()">▶ 看线段怎么变正方形</button>
+        </div>
         <div class="grid" id="sqGrid" style="grid-template-columns:repeat(4,1fr)"></div>
+        <div class="mini-cap" id="sqCap"></div>
         <div class="explain" id="sqExplain"></div>
       </div>
     </section>
@@ -324,6 +407,16 @@
         <div class="formula num" id="sqrtFormula"></div>
         <div class="grid" id="sqrtGrid" style="grid-template-columns:repeat(5,1fr)"></div>
         <div class="explain" id="sqrtExplain"></div>
+        <hr style="border:none;border-top:1px dashed var(--line);margin:18px 0">
+        <h2 style="font-size:20px">🟫 你来当小泥匠：捏出边长</h2>
+        <p class="lead">已知一块泥巴的面积是 <b id="clayA">25</b>，拖动滑块捏出它的边长，刚好拼成正方形就成功！这正是在求 √面积——已知面积，反推边长。</p>
+        <div class="clay-area">
+          <div class="clay-grid" id="clayGrid"></div>
+          <div class="ctrl">边长猜测 n <span id="clayNV" class="num">5</span>
+            <input type="range" id="clayN" min="1" max="12" value="5" oninput="updateClay()">
+          </div>
+        </div>
+        <div class="formula num" id="clayFb"></div>
       </div>
     </section>
 
@@ -364,6 +457,39 @@
         <div class="geo-stage" id="geoStage"></div>
         <div class="geo-info" id="solidInfo"></div>
       </div>
+
+      <div class="card">
+        <h3 style="font-size:17px;margin:6px 0">③ 平行四边形 → 长方形：剪一剪、拼一拼</h3>
+        <p class="lead">所有平行四边形的面积都等于“底 × 高”。秘密在于：切下左边多出的三角形，拼到右边，就变成一个规规矩矩的长方形！点按钮看看。</p>
+        <div class="geo-svg-box">
+          <svg id="paraSvg" width="340" height="220" viewBox="0 0 320 220">
+            <polygon points="100,70 260,70 200,170 100,170" fill="rgba(24,194,184,.18)" stroke="#18c2b8" stroke-width="3" stroke-linejoin="round"/>
+            <polygon class="para-tri" id="paraTri" points="40,170 100,170 100,70" fill="rgba(124,92,255,.32)" stroke="#7c5cff" stroke-width="3" stroke-linejoin="round"/>
+            <rect class="para-rect" id="paraRect" x="100" y="70" width="160" height="100" fill="none" stroke="#ff6ba6" stroke-width="3" stroke-dasharray="6 4" rx="4"/>
+          </svg>
+        </div>
+        <div class="controls" style="justify-content:center">
+          <button class="play-btn" onclick="playPara()">✂️ 剪一剪，拼成长方形</button>
+        </div>
+        <div class="explain">平行四边形面积 = <b>底 × 高</b>（和拼出来的长方形一样大）。这就是“等积变换”——形状变了，面积不变。</div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:17px;margin:6px 0">④ 圆面积：极限展开成近似长方形</h3>
+        <p class="lead">把圆像切披萨一样切成很多份，交错拼起来，会越来越像长方形。份数越多越像——这个长方形的长 ≈ <b>π r</b>、宽 = <b>r</b>，所以 <b>S = π r²</b>。</p>
+        <div class="geo-svg-box">
+          <svg id="circleSvg" width="340" height="220" viewBox="0 0 320 220"></svg>
+        </div>
+        <div class="controls" style="justify-content:center">
+          <div class="ctrl">切成几份
+            <select class="field num" id="circleN" onchange="updateCircleN()">
+              <option value="8">8 份</option><option value="16" selected>16 份</option><option value="32">32 份</option>
+            </select>
+          </div>
+          <button class="play-btn" onclick="playCircle()">▶ 把圆展开成方形</button>
+        </div>
+        <div class="formula num" id="circleFb"></div>
+      </div>
     </section>
 
     <footer>奇妙数学乐园 · 用动画和 3D 帮小学生爱上数学 · 开源免费 · MIT License</footer>
@@ -377,6 +503,12 @@ let starred = JSON.parse(localStorage.getItem('mathStarred') || '{}');
 function renderStars(){ $('starCount').textContent = stars; }
 function earn(mod){ if(!starred[mod]){ starred[mod]=1; stars++; localStorage.setItem('mathStars',stars); localStorage.setItem('mathStarred',JSON.stringify(starred)); renderStars(); } }
 renderStars();
+function toast(msg){
+  let t=$('toast');
+  if(!t){ t=document.createElement('div'); t.id='toast'; t.style.cssText='position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:#2b2d42;color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transition:opacity .25s;pointer-events:none'; document.body.appendChild(t); }
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._tm); t._tm=setTimeout(()=>{ t.style.opacity='0'; }, 1800);
+}
 
 /* ---------- navigation ---------- */
 const screens = ['home','ch-origin','ch-add','ch-mul','ch-parity','ch-square','ch-sqrt','ch-area','ch-geo'];
@@ -389,28 +521,33 @@ function show(id){
   if(id==='ch-square') updateSquare();
   if(id==='ch-sqrt') updateSqrt();
   if(id==='ch-area') updateArea();
-  if(id==='ch-geo'){ buildPolyBtns(); buildSolidBtns(); selectPoly('square'); selectSolid('cube'); }
+  if(id==='ch-geo'){ buildPolyBtns(); buildSolidBtns(); selectPoly('square'); selectSolid('cube'); buildCircle(+$('circleN').value); }
 }
 
 /* ---------- 数字的产生 ---------- */
-let sheepCount = 0;
-function addSheep(){
-  sheepCount++;
-  const s = $('originScene');
+let appleCount = 0;
+function addApple(){
+  appleCount++;
+  const s = $('appleShelf');
   const el = document.createElement('span');
-  el.className='sheep'; el.textContent='🐑'; el.style.animationDelay=(sheepCount*0.03)+'s';
+  el.className='apple'; el.textContent='🍎';
   s.appendChild(el);
-  // tally marks in groups of 5 (正 style)
-  let tally='';
-  const full = Math.floor(sheepCount/5);
-  const rem = sheepCount%5;
+  const tens = Math.floor(appleCount/10);
+  renderTens(tens, appleCount%10);
+  let tally=''; const full=Math.floor(appleCount/5), rem=appleCount%5;
   for(let i=0;i<full;i++) tally+='正 ';
   if(rem>0){ for(let i=0;i<rem;i++) tally+='|'; }
   $('tallyText').textContent = tally.trim() || '（还没有）';
-  $('numBadge').textContent = sheepCount;
+  $('numBadge').textContent = appleCount;
+  if(appleCount>0 && appleCount%10===0) toast('🪙 逢十进一！10 个苹果熔成 1 枚十位金币');
   earn('origin');
 }
-function resetOrigin(){ sheepCount=0; $('originScene').innerHTML=''; $('tallyText').textContent='（还没有）'; $('numBadge').textContent='0'; }
+function renderTens(tens, ones){
+  const c=$('tensCoins'); c.innerHTML='';
+  for(let i=0;i<tens;i++){ const d=document.createElement('div'); d.className='ten-coin'; d.innerHTML='🪙<small>10</small>'; c.appendChild(d); }
+  if(ones>0){ const d=document.createElement('div'); d.className='ten-coin'; d.style.opacity='.5'; d.innerHTML='🍎<small>'+ones+'</small>'; c.appendChild(d); }
+}
+function resetOrigin(){ appleCount=0; $('appleShelf').innerHTML=''; $('tensCoins').innerHTML=''; $('tallyText').textContent='（还没有）'; $('numBadge').textContent='0'; }
 
 /* ---------- 加减法 ---------- */
 function blocks(n, color, delayBase){
@@ -461,10 +598,49 @@ function updateAdd(){
   earn('add');
 }
 
+/* 3D 数轴：小兔子跳跃 */
+let hopRAF=null;
+function animateHop(){
+  const a=+$('addA').value||0, b=+$('addB').value||0, op=$('addOp').value;
+  const result = op==='-' ? Math.max(0,a-b) : a+b;
+  const canvas=$('addLine'); const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height, pad=34, y=H/2, x0=pad, x1=W-pad;
+  const maxN=Math.max(a+b,a,result,12);
+  const sx=v=>x0+(x1-x0)*(v/maxN);
+  function base(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#c9d2e8'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
+    ctx.fillStyle='#8893b0'; ctx.font='12px Baloo 2, sans-serif'; ctx.textAlign='center';
+    for(let i=0;i<=maxN;i++){ const x=sx(i); ctx.beginPath(); ctx.moveTo(x,y-8); ctx.lineTo(x,y+8); ctx.stroke(); ctx.fillText(i,x,y+26); }
+  }
+  cancelAnimationFrame(hopRAF);
+  const dur=1100; let t0=null;
+  function frame(t){
+    if(t0===null) t0=t;
+    const p=Math.min(1,(t-t0)/dur);
+    const e=1-Math.pow(1-p,3);
+    const val=e*result; const x=sx(val);
+    const hops=Math.max(2,result);
+    const hop=Math.abs(Math.sin(p*Math.PI* hops))*20;
+    base();
+    ctx.font='30px serif'; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+    ctx.fillText('🐰', x, y-24-hop);
+    ctx.fillStyle='#7c5cff'; ctx.beginPath(); ctx.arc(x,y,6,0,7); ctx.fill();
+    if(p<1){ hopRAF=requestAnimationFrame(frame); }
+    else {
+      base(); ctx.fillText('🐰', sx(result), y-24);
+      ctx.fillStyle='#7c5cff'; ctx.beginPath(); ctx.arc(sx(result),y,7,0,7); ctx.fill();
+      ctx.fillStyle='#2b2d42'; ctx.font='bold 15px Baloo 2'; ctx.fillText('落点 '+result, sx(result), y-48);
+    }
+  }
+  hopRAF=requestAnimationFrame(frame);
+}
+
 /* ---------- 乘除法 ---------- */
 function updateMul(){
   const rows=+$('mulRows').value, cols=+$('mulCols').value;
   $('mulRowsV').textContent=rows; $('mulColsV').textContent=cols;
+  $('mulRowsCap').textContent=rows; $('mulColsCap').textContent=cols;
   const total=rows*cols;
   $('mulFormula').innerHTML = `${rows} <b>×</b> ${cols} <b>=</b> ${total}`;
   let s=''; for(let i=0;i<total;i++) s+=`<div class="cell" style="animation-delay:${i*0.02}s"></div>`;
@@ -474,6 +650,7 @@ function updateMul(){
   $('mulExplain').innerHTML = `乘法 = 把 <b>${cols}</b> 连续加 <b>${rows}</b> 次（${terms.join(' + ')}），排成 <b>${rows}</b> 行 <b>${cols}</b> 列，正好 <b>${total}</b> 个。这就是“阵列”。`;
   earn('mul');
 }
+function toggleMul3d(){ $('mulGrid').classList.toggle('tilt'); }
 function updateDiv(){
   const total=+$('divTotal').value, g=+$('divGroup').value;
   $('divTotalV').textContent=total; $('divGroupV').textContent=g;
@@ -488,7 +665,30 @@ function updateDiv(){
   }
   $('divGroups').innerHTML=html;
   $('divExplain').innerHTML = `把 <b>${total}</b> 个东西平均分成 <b>${g}</b> 份，每份 <b>${per}</b> 个${rem?`，还多 <b>${rem}</b> 个放不下（余数）`:''}。除法就是“公平地分一分”。`;
+  updateCake(total,g);
   earn('div');
+}
+function updateCake(total,g){
+  const svg=$('cakeSvg'); if(!svg) return;
+  const ns='http://www.w3.org/2000/svg';
+  svg.innerHTML='';
+  const cx=120,cy=110,r=80;
+  const plate=document.createElementNS(ns,'circle'); plate.setAttribute('cx',cx);plate.setAttribute('cy',cy);plate.setAttribute('r',r+8);plate.setAttribute('fill','#fff');plate.setAttribute('stroke','#e3e8f7');plate.setAttribute('stroke-width','3'); svg.appendChild(plate);
+  const per=Math.floor(total/g);
+  const slices=Math.min(g,12);
+  for(let i=0;i<slices;i++){
+    const a0=(i/slices)*2*Math.PI - Math.PI/2;
+    const a1=((i+1)/slices)*2*Math.PI - Math.PI/2;
+    const x0=cx+r*Math.cos(a0), y0=cy+r*Math.sin(a0);
+    const x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1);
+    const path=document.createElementNS(ns,'path');
+    path.setAttribute('d',`M${cx},${cy} L${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 0 1 ${x1.toFixed(1)},${y1.toFixed(1)} Z`);
+    path.setAttribute('fill', i%2? '#ffd23f':'#ff9f43');
+    path.setAttribute('opacity','.92'); path.setAttribute('stroke','#fff'); path.setAttribute('stroke-width','2');
+    svg.appendChild(path);
+    const am=(a0+a1)/2; const lx=cx+(r*0.62)*Math.cos(am), ly=cy+(r*0.62)*Math.sin(am);
+    const t=document.createElementNS(ns,'text'); t.setAttribute('x',lx.toFixed(1));t.setAttribute('y',(ly+5).toFixed(1));t.setAttribute('text-anchor','middle');t.setAttribute('font-size','15');t.setAttribute('font-family','Baloo 2, sans-serif');t.setAttribute('fill','#7a3b00');t.setAttribute('font-weight','bold');t.textContent=per; svg.appendChild(t);
+  }
 }
 
 /* ---------- 奇数偶数 ---------- */
@@ -498,7 +698,7 @@ function updateParity(){
   $('parityFormula').innerHTML = `${n} 是 <b>${even?'偶数 ✅':'奇数 ❌'}</b>`;
   let html=''; let i=0;
   while(i+1<n){ html+=`<div class="pair"><span class="pdot" style="animation:pop .25s backwards;animation-delay:${i*0.03}s"></span><span class="pdot" style="animation:pop .25s backwards;animation-delay:${(i+1)*0.03}s"></span></div>`; i+=2; }
-  if(i<n){ html+=`<div class="pair alone"><span class="pdot solo" style="animation:pop .25s backwards;animation-delay:${i*0.03}s"></span></div>`; }
+  if(i<n){ html+=`<div class="pair alone"><span class="pdot solo"></span></div>`; }
   $('parityPairs').innerHTML=html || '<div class="geo-info">0 个：什么都没有，算偶数哦</div>';
   $('parityExplain').innerHTML = even
     ? `<b>${n}</b> 能两个两个刚好配完，没有落单的，所以是<b>偶数</b>。偶数 ÷ 2 正好整除。`
@@ -513,8 +713,18 @@ function updateSquare(){
   $('sqFormula').innerHTML = `${n}² <b>=</b> ${n} <b>×</b> ${n} <b>=</b> ${total}`;
   let s=''; for(let i=0;i<total;i++) s+=`<div class="cell" style="animation-delay:${i*0.012}s"></div>`;
   const g=$('sqGrid'); g.style.gridTemplateColumns=`repeat(${n},1fr)`; g.innerHTML=s;
+  $('sqCap').innerHTML = `一条长 <b>${n}</b> 的线段，向上拉伸 <b>${n}</b> 格 → 变成 <b>${n}×${n}</b> 的正方形，面积 <b>${total}</b>`;
   $('sqExplain').innerHTML = `${n} 的平方就是排成一个 <b>${n} 行 × ${n} 列</b> 的大正方形，一共 <b>${total}</b> 个小格子。平方数总能拼成完整的正方形！`;
   earn('square');
+}
+function playSquare(){
+  const n=+$('sqN').value;
+  const g=$('sqGrid');
+  g.style.gridTemplateColumns=`repeat(${n},1fr)`;
+  let s=''; for(let i=0;i<n;i++) s+=`<div class="cell" style="animation:pop .25s backwards;animation-delay:${i*0.04}s"></div>`;
+  g.innerHTML=s;
+  $('sqCap').innerHTML=`① 先有一条长 <b>${n}</b> 的线段（1 维）……`;
+  setTimeout(()=>{ updateSquare(); $('sqCap').innerHTML=`② 向上拉伸 <b>${n}</b> 格 → 变成 <b>${n}×${n}</b> 的正方形（2 维），面积 <b>${n*n}</b>`; }, 850);
 }
 
 /* ---------- 根号 ---------- */
@@ -525,7 +735,20 @@ function updateSqrt(){
   let html=''; for(let i=0;i<A;i++) html+=`<div class="cell" style="animation-delay:${i*0.01}s"></div>`;
   const g=$('sqrtGrid'); g.style.gridTemplateColumns=`repeat(${s},1fr)`; g.innerHTML=html;
   $('sqrtExplain').innerHTML = `已知大正方形的面积是 <b>${A}</b>，反推它的边长：边长 = <b>√${A} = ${s}</b>。所以<b>根号是平方的反动作</b>——一个把“面积”变回“边长”的魔法。`;
+  updateClay();
   earn('sqrt');
+}
+function updateClay(){
+  const A=+$('sqrtA').value;
+  const n=+$('clayN').value;
+  $('clayA').textContent=A; $('clayNV').textContent=n;
+  const g=$('clayGrid'); g.style.gridTemplateColumns=`repeat(${n},1fr)`;
+  let s=''; const total=n*n;
+  for(let i=0;i<total;i++) s+=`<div class="clay-cell" style="animation-delay:${i*0.01}s"></div>`;
+  g.innerHTML=s;
+  if(n*n===A){ $('clayFb').innerHTML=`<span class="win-badge">🎉 正好拼成正方形！边长 = ${n} = √${A}</span>`; }
+  else if(n*n<A){ $('clayFb').innerHTML=`还差一点：现在面积是 ${n*n}，需要 ${A}，再捏大些～`; }
+  else { $('clayFb').innerHTML=`捏太大了：现在面积是 ${n*n}，超过 ${A}，收小一点～`; }
 }
 
 /* ---------- 面积 ---------- */
@@ -613,6 +836,47 @@ function selectSolid(k){
   }
   $('solidInfo').innerHTML = `<b>${info.name}</b>：${info.info}`;
   earn('geo');
+}
+
+/* ---------- 几何：平行四边形剪拼 / 圆极限 ---------- */
+function playPara(){
+  $('paraTri').classList.toggle('move');
+  $('paraRect').classList.toggle('show');
+}
+let circleExpanded=false;
+function buildCircle(N){
+  const svg=$('circleSvg'); if(!svg) return;
+  const ns='http://www.w3.org/2000/svg';
+  svg.innerHTML='';
+  const r=70, cx=150, cy=110;
+  const circ=document.createElementNS(ns,'circle'); circ.setAttribute('cx',cx);circ.setAttribute('cy',cy);circ.setAttribute('r',r);circ.setAttribute('fill','rgba(255,159,67,.18)');circ.setAttribute('stroke','#ff9f43');circ.setAttribute('stroke-width','3'); svg.appendChild(circ);
+  const step=(2*Math.PI)/N;
+  const w=220/N;
+  for(let i=0;i<N;i++){
+    const a0=-Math.PI/2 + i*step, a1=a0+step;
+    const x0=cx+r*Math.cos(a0), y0=cy+r*Math.sin(a0);
+    const x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1);
+    const p=document.createElementNS(ns,'path');
+    p.setAttribute('d',`M${cx},${cy} L${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 0 1 ${x1.toFixed(1)},${y1.toFixed(1)} Z`);
+    p.setAttribute('fill', i%2? 'rgba(255,210,63,.5)':'rgba(255,159,67,.5)');
+    p.setAttribute('stroke','#fff'); p.setAttribute('stroke-width','1.5');
+    p.setAttribute('class','sector');
+    const tx=(i-(N-1)/2)*w;
+    const ty=(i%2? r*0.5 : -r*0.5);
+    p.dataset.tx=tx; p.dataset.ty=ty;
+    p.style.transformBox='view-box';
+    svg.appendChild(p);
+  }
+}
+function updateCircleN(){ buildCircle(+$('circleN').value); circleExpanded=false; $('circleFb').innerHTML='拖动滑块看切的份数，点“展开”看它怎么变成长方形。'; }
+function playCircle(){
+  circleExpanded=!circleExpanded;
+  document.querySelectorAll('#circleSvg .sector').forEach(p=>{
+    p.style.transform = circleExpanded ? `translate(${p.dataset.tx}px,${p.dataset.ty}px)` : 'translate(0,0)';
+  });
+  $('circleFb').innerHTML = circleExpanded
+    ? `圆被切成 ${+$('circleN').value} 份再拼起来，越来越像长方形：长 ≈ <b>π r</b>，宽 = <b>r</b>，所以 <b>S = π r × r = π r²</b>`
+    : `切得越细（试试 32 份），拼出来的长方形就越标准。`;
 }
 
 /* init */
