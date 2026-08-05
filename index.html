@@ -285,6 +285,7 @@
   .kid-cap{ font-family:'Baloo 2'; font-size:12px; color:var(--ink-soft); text-align:center; }
   .bags{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:10px 0; }
   .bag{ background:#fff; border:3px solid #bfe3d6; border-radius:16px; padding:8px 10px; min-width:96px; }
+  .bag-icon{font-size:28px;text-align:center;margin-bottom:2px;}
   .bag.leftover{ border-color:#ffd9a0; opacity:.85; }
   .bag-cap{ font-family:'Baloo 2'; font-weight:800; font-size:13px; color:var(--ink-soft); text-align:center; margin-bottom:4px; }
   .bag-fruits{ display:flex; flex-wrap:wrap; gap:2px; justify-content:center; min-height:28px; }
@@ -1176,7 +1177,7 @@ function updateShare(){
   shareStep=0;
   const per=Math.floor(total/kids), rem=total%kids;
   let h='';
-  for(let k=0;k<kids;k++) h+=`<div class="kid"><div class="kid-face">👧</div><div class="kid-fruits" id="kidFruits${k}"></div><div class="kid-cap">第 ${k+1} 个</div></div>`;
+  for(let k=0;k<kids;k++) h+=`<div class="kid"><div class="kid-face">👧</div><div class="kid-fruits" id="kidFruits${k}"></div><div class="kid-cap">第 ${k+1} 个 · 预计 ${per}🍬</div></div>`;
   $('shareKidsBox').innerHTML=h;
   $('shareFormula').innerHTML=`${total} <b>÷</b> ${kids} <b>=</b> 每人 ${per}${rem?` 余 ${rem}`:''}`;
   $('shareExplain').innerHTML=`把 <b>${total}</b> 颗糖<b>平均分</b>给 <b>${kids}</b> 个小朋友，每人分到 <b>${per}</b> 颗${rem?`，多 <b>${rem}</b> 颗分不完（余数）`:''}。点「一个个分」看分发过程～`;
@@ -1206,8 +1207,8 @@ function updateBag(){
   bagStep=0;
   const bags=Math.floor(total/size), rem=total%size;
   let h='';
-  for(let k=0;k<bags;k++) h+=`<div class="bag"><div class="bag-cap">第 ${k+1} 袋</div><div class="bag-fruits" id="bagFruits${k}"></div></div>`;
-  if(rem>0) h+=`<div class="bag leftover"><div class="bag-cap">剩下</div><div class="bag-fruits">${'🍬'.repeat(rem)}</div></div>`;
+  for(let k=0;k<bags;k++) h+=`<div class="bag"><div class="bag-icon">🎒</div><div class="bag-cap">${k+1} 袋</div><div class="bag-fruits" id="bagFruits${k}"></div></div>`;
+  if(rem>0) h+=`<div class="bag leftover"><div class="bag-icon">📦</div><div class="bag-cap">剩下</div><div class="bag-fruits">${'🍬'.repeat(rem)}</div></div>`;
   $('bagBox').innerHTML=h;
   $('bagFormula').innerHTML=`${total} <b>÷</b> ${size} <b>=</b> ${bags} 袋${rem?` 余 ${rem}`:''}`;
   $('bagExplain').innerHTML=`把 <b>${total}</b> 颗糖，<b>每 ${size} 颗装一袋</b>，能装 <b>${bags}</b> 袋${rem?`，多 <b>${rem}</b> 颗装不满一袋（余数）`:''}。点「一个个装袋」看过程～`;
