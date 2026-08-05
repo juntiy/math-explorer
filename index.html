@@ -203,9 +203,24 @@
   .clay-cell{ width:17px; height:17px; border-radius:4px; background:linear-gradient(135deg,#d8b078,#a9793f); box-shadow:inset 0 -2px 0 rgba(0,0,0,.15); animation:pop .2s backwards; }
   .clay-cell.off{ background:rgba(120,90,40,.08); box-shadow:none; }
   .win-badge{ color:var(--green); font-weight:800; font-size:18px; }
-  /* ---------- 奇偶：落单者发光摇晃 ---------- */
-  .pdot.solo{ animation:aloneGlow 1s ease-in-out infinite; }
-  @keyframes aloneGlow{ 0%,100%{ transform:translateY(0) scale(1); box-shadow:0 0 0 0 rgba(255,107,107,.5);} 50%{ transform:translateY(-4px) scale(1.12); box-shadow:0 0 0 7px rgba(255,107,107,0);} }
+  /* ---------- 奇偶：BBC 数字积木 堆叠墙 ---------- */
+  .parity-wall{ display:flex; gap:14px; align-items:flex-end; justify-content:flex-start; overflow-x:auto; padding:16px 4px 8px; margin:6px 0; scroll-behavior:smooth; }
+  .parity-wall::-webkit-scrollbar{ height:8px; }
+  .parity-wall::-webkit-scrollbar-thumb{ background:var(--line); border-radius:8px; }
+  .stk{ display:flex; flex-direction:column; align-items:center; cursor:pointer; flex:0 0 auto; padding:4px; border-radius:12px; transition:transform .15s; }
+  .stk:hover{ transform:translateY(-3px); }
+  .stk-body{ display:grid; grid-template-columns:repeat(2,1fr); gap:3px; align-items:flex-end; position:relative; }
+  .ub{ width:20px; height:20px; border-radius:5px; box-shadow:inset 0 -3px 0 rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.12); animation:dropBlock .3s backwards; }
+  .ub.head{ position:absolute; top:-23px; left:50%; transform:translateX(-50%); animation:dropBlock .3s backwards, headWob 1.5s ease-in-out infinite .3s; }
+  @keyframes dropBlock{ 0%{ transform:translateY(-16px); opacity:0; } 100%{ transform:translateY(0); opacity:1; } }
+  @keyframes headWob{ 0%,100%{ transform:translateX(-50%) translateY(0) rotate(-5deg);} 50%{ transform:translateX(-50%) translateY(-3px) rotate(5deg);} }
+  .stk-lab{ margin-top:9px; font-family:'Baloo 2'; font-size:15px; color:var(--ink); }
+  .stk-tag{ font-size:11px; padding:1px 9px; border-radius:999px; margin-top:3px; font-family:'Baloo 2'; }
+  .stk-tag.even{ background:#e7f8ee; color:#1aa564; }
+  .stk-tag.odd{ background:#ffe9ef; color:#ff5b5b; }
+  .stk.sel .stk-body{ outline:3px solid var(--purple); outline-offset:3px; border-radius:8px; }
+  .stk.sel .stk-lab{ color:var(--purple); font-weight:800; }
+  .stk.sel .stk-tag{ outline:2px solid currentColor; }
   /* ---------- 几何：剪拼 / 圆极限 ---------- */
   .geo-svg-box{ text-align:center; }
   .para-tri{ transition:transform .9s cubic-bezier(.5,.05,.3,1); }
@@ -390,15 +405,16 @@
     <section class="screen" id="ch-parity">
       <div class="card">
         <span class="badge">奇数偶数</span>
-        <h2>🔁 偶数爱成对，奇数多一个</h2>
-        <p class="lead">把东西两个两个配成一对：刚好配完的是<b>偶数</b>（能被 2 整除）；剩下一个落单的是<b>奇数</b>。拖动滑块看看每个数长什么样。</p>
+        <h2>🔁 偶数平平的，奇数顶上多一块</h2>
+        <p class="lead">像 BBC《数字积木 Numberblocks》里那样：把小方块一块块摞起来——<b>偶数</b>两个两个配成平平的一摞，<b>顶上平平的</b>；<b>奇数</b>配完还剩一块，<b>顶上孤零零多出一块</b>。顺着往下看，奇偶的规律一目了然。</p>
         <div class="controls">
-          <div class="ctrl">数量 n <span id="parityV" class="num">7</span>
-            <input type="range" id="parityN" min="0" max="20" value="7" oninput="updateParity()">
+          <div class="ctrl">显示到 n <span id="parityV" class="num">10</span>
+            <input type="range" id="parityN" min="1" max="20" value="10" oninput="parityMax=+$('parityN').value; $('parityV').textContent=parityMax; buildParityWall(); selectParity(parityMax);">
           </div>
+          <div class="mini-cap" style="margin:0">👆 点任意一列可放大查看</div>
         </div>
         <div class="formula num" id="parityFormula"></div>
-        <div class="pairs" id="parityPairs"></div>
+        <div class="parity-wall" id="parityWall"></div>
         <div class="explain" id="parityExplain"></div>
       </div>
     </section>
@@ -645,7 +661,7 @@ function show(id){
   document.querySelectorAll('.nav-btn').forEach(b=> b.classList.toggle('on', b.dataset.target===id));
   if(id==='ch-add') updateAdd();
   if(id==='ch-mul'){ updateMul(); updateDiv(); }
-  if(id==='ch-parity') updateParity();
+  if(id==='ch-parity'){ buildParityWall(); selectParity(parityMax); earn('parity'); }
   if(id==='ch-square') updateSquare();
   if(id==='ch-sqrt') updateSqrt();
   if(id==='ch-area') updateArea();
@@ -821,18 +837,30 @@ function updateCake(total,g){
 }
 
 /* ---------- 奇数偶数 ---------- */
-function updateParity(){
-  const n=+$('parityN').value; $('parityV').textContent=n;
-  const even = n%2===0;
-  $('parityFormula').innerHTML = `${n} 是 <b>${even?'偶数 ✅':'奇数 ❌'}</b>`;
-  let html=''; let i=0;
-  while(i+1<n){ html+=`<div class="pair"><span class="pdot" style="animation:pop .25s backwards;animation-delay:${i*0.03}s"></span><span class="pdot" style="animation:pop .25s backwards;animation-delay:${(i+1)*0.03}s"></span></div>`; i+=2; }
-  if(i<n){ html+=`<div class="pair alone"><span class="pdot solo"></span></div>`; }
-  $('parityPairs').innerHTML=html || '<div class="geo-info">0 个：什么都没有，算偶数哦</div>';
-  $('parityExplain').innerHTML = even
-    ? `<b>${n}</b> 能两个两个刚好配完，没有落单的，所以是<b>偶数</b>。偶数 ÷ 2 正好整除。`
-    : `<b>${n}</b> 两个两个配，最后多出 <b>1</b> 个落单，所以是<b>奇数</b>。奇数 ÷ 2 会余 1。`;
-  earn('parity');
+let parityMax = 10;
+const parityColors = ['#ff5b5b','#ff9f43','#ffd23f','#2ecc71','#18c2b8','#4d96ff','#7c5cff','#b06bff','#ff6ba6','#ff8f5e'];
+function buildParityWall(){
+  const N = parityMax, wall = $('parityWall'); wall.innerHTML=''; let delay=0;
+  for(let n=1;n<=N;n++){
+    const isOdd = n%2===1, bodyCount = isOdd ? n-1 : n;
+    const col=document.createElement('div'); col.className='stk'; col.dataset.n=n; col.onclick=()=>selectParity(n);
+    const body=document.createElement('div'); body.className='stk-body';
+    const color=parityColors[(n-1)%parityColors.length];
+    for(let i=0;i<bodyCount;i++){ const b=document.createElement('div'); b.className='ub'; b.style.background=color; b.style.animationDelay=(delay*0.012)+'s'; delay++; body.appendChild(b); }
+    if(isOdd){ const h=document.createElement('div'); h.className='ub head'; h.style.background=color; h.style.animationDelay=(delay*0.012)+'s'; delay++; body.appendChild(h); }
+    const lab=document.createElement('div'); lab.className='stk-lab'; lab.textContent=n;
+    const tag=document.createElement('div'); tag.className='stk-tag '+(isOdd?'odd':'even'); tag.textContent=isOdd?'奇 ⬆':'偶 ✓';
+    col.appendChild(body); col.appendChild(lab); col.appendChild(tag); wall.appendChild(col);
+  }
+}
+function selectParity(n){
+  document.querySelectorAll('.stk').forEach(s=>s.classList.toggle('sel', +s.dataset.n===n));
+  const isOdd = n%2===1;
+  $('parityFormula').innerHTML = `${n} 是 <b>${isOdd?'奇数 ⬆':'偶数 ✓'}</b>`;
+  $('parityExplain').innerHTML = isOdd
+    ? `<b>${n}</b> 两个两个配，最后<b>顶上多出一块</b>孤零零的，所以是<b>奇数</b>。奇数 ÷ 2 会余 1。`
+    : `<b>${n}</b> 两个两个刚好配完，<b>顶上平平的</b>没有多出的，所以是<b>偶数</b>。偶数 ÷ 2 正好整除。`;
+  const wall=$('parityWall'); wall.scrollTo({ left: Math.max(0, (n-1)*71 - wall.clientWidth/2 + 35), behavior:'smooth' });
 }
 
 /* ---------- 平方 ---------- */
