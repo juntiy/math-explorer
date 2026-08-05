@@ -258,6 +258,12 @@
   .bowl-cap{ font-family:'Baloo 2'; font-size:16px; color:#a9742f; font-weight:800; }
   .bowl .candies{ justify-content:center; max-width:480px; }
   .bowl-total{ font-family:'Baloo 2'; font-size:46px; font-weight:900; color:var(--purple); margin-top:4px; }
+  /* 5个5个排列 */
+  .bowl-fives{ display:flex; flex-direction:column; align-items:center; gap:6px; width:100%; }
+  .bowl-five-row{ display:flex; gap:3px; align-items:center; flex-wrap:wrap; justify-content:center; padding:4px 8px; border-radius:12px; transition:.25s; }
+  .bowl-five-row:hover{ background:rgba(124,92,255,.07); }
+  .bowl-five-label{ font-family:'Baloo 2'; font-size:15px; font-weight:800; color:#fff; background:linear-gradient(90deg,#ff9f43,#ff6b6b); min-width:28px; height:28px; line-height:28px; text-align:center; border-radius:8px; margin-left:4px; box-shadow:0 2px 6px rgba(255,111,107,.3); animation:pop .35s backwards; }
+  .bowl-five-line{ width:85%; height:2px; background:repeating-linear-gradient(90deg, #ffcf8f 0, #ffcf8f 8px, transparent 8px, transparent 14px); margin:2px 0; border-radius:1px; opacity:.5; }
   .plate{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; background:#fff; border:4px solid #ffd9a0; border-radius:50%/40%; padding:22px; margin:8px auto; max-width:560px; min-height:60px; box-shadow:inset 0 0 0 6px #fff4e2; }
   .apple{ font-size:36px; cursor:pointer; transition:transform .15s, opacity .3s; display:inline-block; }
   .apple:hover{ transform:scale(1.12) rotate(-6deg); }
@@ -429,6 +435,7 @@
           </div>
           <div class="controls" style="justify-content:center;margin-top:10px">
             <button class="play-btn" onclick="mergeCandy()">🥣 合并成大碗！</button>
+            <button class="play-btn tgl" id="btnBowlFives" onclick="toggleBowlFives()" style="display:none">🔢 5个5��数</button>
           </div>
           <div class="bowl" id="candyBowl"></div>
           <div class="formula num" id="addFormula"></div>
@@ -937,14 +944,62 @@ function addCandy(side){
   const el=$(id); el.value = Math.min(20, (+$el.value||0)+1);
   updateAddGame();
 }
+let bowlFivesMode = false;  /* 大碗是否处于5个5个排列模式 */
 function mergeCandy(){
   const a=+$('addA').value||0, b=+$('addB').value||0, total=a+b;
   const bowl=$('candyBowl');
-  let h=`<div class="bowl-cap">🥣 大碗里一共有</div>`;
-  for(let i=0;i<total;i++) h+=`<span class="candy c-purple" style="animation:pop .3s backwards;animation-delay:${(i*0.04).toFixed(2)}s">🍬</span>`;
+  bowlFivesMode = false;
+  $('btnBowlFives').style.display='';
+  $('btnBowlFives').classList.remove('on');
+  renderBowl(a,b,total);
+}
+function toggleBowlFives(){
+  bowlFivesMode = !bowlFivesMode;
+  const btn=$('btnBowlFives');
+  if(bowlFivesMode) btn.classList.add('on'); else btn.classList.remove('on');
+  const a=+$('addA').value||0, b=+$('addB').value||0, total=a+b;
+  renderBowl(a,b,total);
+  sfx(bowlFivesMode ? 'ok' : 'fold');
+}
+function renderBowl(a,b,total){
+  const bowl=$('candyBowl');
+  if(!bowlFivesMode){
+    /* 普通竖排模式 */
+    let h=`<div class="bowl-cap">🥣 大碗里一共有</div>`;
+    for(let i=0;i<total;i++) h+=`<span class="candy c-purple" style="animation:pop .3s backwards;animation-delay:${(i*0.04).toFixed(2)}s">🍬</span>`;
+    h+=`<div class="bowl-total num">${total}</div>`;
+    bowl.innerHTML=h; bowl.classList.add('show');
+    return;
+  }
+  /* 5个5个排列模式 */
+  let h=`<div class="bowl-cap">🔢 按 <b>5个</b> 一组数，找规律！</div><div class="bowl-fives">`;
+  const fullGroups = Math.floor(total / 5);
+  const remainder = total % 5;
+  for(let g=0; g<fullGroups; g++){
+    h+=`<div class="bowl-five-row" style="animation-delay:${(g*0.1).toFixed(2)}s">`;
+    for(let i=0;i<5;i++) h+=`<span class="candy c-purple" style="animation:pop .3s backwards;animation-delay:${(g*5+i)*0.04}s">🍬</span>`;
+    h+=`<span class="bowl-five-label" style="animation-delay:${(g*5+4)*0.04}s">${(g+1)*5}</span></div>`;
+    if(g < fullGroups-1 || remainder > 0) h+=`<div class="bowl-five-line"></div>`;
+  }
+  if(remainder > 0){
+    h+=`<div class="bowl-five-row" style="animation-delay:${(fullGroups*5*0.04).toFixed(2)}s">`;
+    for(let i=0;i<remainder;i++) h+=`<span class="candy c-purple" style="animation:pop .3s backwards;animation-delay:${(fullGroups*5+i)*0.04}s">🍬</span>`;
+    h+=`<span class="bowl-five-label" style="background:linear-gradient(90deg,#18c2b8,#2ecc71);box-shadow:0 2px 6px rgba(24,194,184,.3)">${total}</span></div>`;
+  }
+  h+=`</div>`;
   h+=`<div class="bowl-total num">${total}</div>`;
+  /* 底部规律提示 */
+  const fivesStr = fullGroups > 0 ? Array.from({length:fullGroups},(_,i)=>(i+1)*5).join('、') : '';
+  let tip = '';
+  if(fullGroups >= 2){
+    tip = `<div style="margin-top:6px;font-size:13px;color:#a9742f;font-family:'Baloo 2'">✨ 规律：每 5 个一组，数到 <b>${fivesStr}</b>，${remainder>0 ? `再加 '+${remainder}' = ` : ''}<b>${total}</b>！</div>`;
+  } else if(fullGroups === 1 && remainder > 0){
+    tip = `<div style="margin-top:6px;font-size:13px;color:#a9742f;font-family:'Baloo 2'">✨ 先数满 <b>5</b> 个，再数剩下的 <b>${remainder}</b> 个，一共 <b>${total}</b> 个！</div>`;
+  } else if(fullGroups === 1){
+    tip = `<div style="margin-top:6px;font-size:13px;color:#a9742f;font-family:'Baloo 2'">✨ 刚好 <b>5</b> 个，一组就数完啦！</div>`;
+  }
+  h += tip;
   bowl.innerHTML=h; bowl.classList.add('show');
-  sfx('ok');
 }
 /* --- 减法：吃掉苹果 --- */
 function updateEat(){
