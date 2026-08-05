@@ -282,6 +282,19 @@
   .bag.leftover{ border-color:#ffd9a0; opacity:.85; }
   .bag-cap{ font-family:'Baloo 2'; font-weight:800; font-size:13px; color:var(--ink-soft); text-align:center; margin-bottom:4px; }
   .bag-fruits{ display:flex; flex-wrap:wrap; gap:2px; justify-content:center; min-height:28px; }
+  /* ---------- 凑十法 ---------- */
+  .m10-stage{ margin:10px 0; }
+  .m10-row{ display:flex; align-items:center; gap:8px; margin:8px 0; flex-wrap:wrap; justify-content:center; }
+  .m10-group{ background:#fff; border:3px solid var(--line); border-radius:16px; padding:10px 14px; text-align:center; }
+  .m10-label{ font-family:'Baloo 2'; font-weight:800; font-size:14px; color:var(--ink-soft); margin-bottom:6px; }
+  .m10-cands{ display:flex; flex-wrap:wrap; gap:3px; justify-content:center; }
+  .m10-cand{ font-size:30px; display:inline-block; animation:pop .25s backwards; cursor:default; }
+  .m10-bracket{ font-family:'Baloo 2'; font-weight:900; font-size:22px; color:var(--purple); padding:0 4px; }
+  .m10-arrow{ font-size:26px; color:var(--purple); }
+  .m10-ten-line{ border-top:3px dashed var(--purple); margin:6px 0; position:relative; }
+  .m10-ten-line::after{ content:'↑ 凑成整十！'; position:absolute; right:0; top:-20px; font-family:'Baloo 2'; font-size:13px; font-weight:800; color:var(--purple); }
+  .m10-split-note{ font-family:'Baloo 2'; font-size:15px; color:#e85d3b; font-weight:700; text-align:center; margin:4px 0; }
+  .m10-simple{ text-align:center; font-family:'Baloo 2'; font-size:18px; color:var(--ink-soft); margin:8px 0; }
 </style>
 </head>
 <body>
@@ -390,6 +403,7 @@
           <button class="seg-btn on" data-mode="add" onclick="setAddMode('add')">🍬 加法·合并</button>
           <button class="seg-btn" data-mode="sub-eat" onclick="setAddMode('sub-eat')">🍎 减法·吃掉</button>
           <button class="seg-btn" data-mode="sub-cmp" onclick="setAddMode('sub-cmp')">📊 减法·比多少</button>
+          <button class="seg-btn" data-mode="make10" onclick="setAddMode('make10')">🧩 凑十法</button>
         </div>
 
         <!-- 加法：糖果合并 -->
@@ -452,6 +466,22 @@
           <div class="cmp-rows" id="cmpRows"></div>
           <div class="formula num" id="cmpFormula"></div>
           <div class="explain" id="cmpExplain"></div>
+        </div>
+
+        <!-- 凑十法 -->
+        <div class="game" id="make10Game" style="display:none">
+          <p class="lead" style="margin-bottom:10px">🧩 <b>凑十法</b>：先把第一个数<b>补成 10</b>，再加剩下的，算得又快又准！</p>
+          <div class="controls">
+            <div class="ctrl">第一个数 a
+              <input class="field num" id="m10a" type="number" value="8" min="0" max="18" oninput="updateMake10()">
+            </div>
+            <div class="ctrl">加上 b
+              <input class="field num" id="m10b" type="number" value="5" min="0" max="18" oninput="updateMake10()">
+            </div>
+          </div>
+          <div class="m10-stage" id="m10Stage"></div>
+          <div class="formula num" id="m10Formula"></div>
+          <div class="explain" id="m10Explain"></div>
         </div>
       </div>
     </section>
@@ -875,12 +905,14 @@ function setAddMode(m){
   $('addGame').style.display    = m==='add'      ? '' : 'none';
   $('subEatGame').style.display = m==='sub-eat'  ? '' : 'none';
   $('subCmpGame').style.display = m==='sub-cmp'  ? '' : 'none';
+  $('make10Game').style.display = m==='make10'   ? '' : 'none';
   updateAdd();
 }
 function updateAdd(){
   if(addMode==='add') updateAddGame();
   else if(addMode==='sub-eat') updateEat();
-  else updateCompare();
+  else if(addMode==='sub-cmp') updateCompare();
+  else updateMake10();
 }
 /* --- 加法：左右糖果合并 --- */
 function candyRow(el, n, cls){
@@ -919,8 +951,11 @@ function updateEat(){
   const a=Math.min(20,Math.max(1,+$('eatA').value||1));
   const b=Math.min(20,Math.max(0,+$('eatB').value||0));
   $('eatA').value=a; $('eatB').value=b;
-  eatEaten=0;
-  renderPlate(a,b,0);
+  /* 改b时自动预吃到目标数，让孩子一眼看到结果 */
+  const target=Math.min(b,a);
+  if(target > eatEaten) eatEaten=target;
+  else if(target < eatEaten) eatEaten=target;
+  renderPlate(a,b,eatEaten);
 }
 function renderPlate(a,b,eaten){
   const plate=$('applePlate'); let h='';
@@ -964,6 +999,90 @@ function updateCompare(){
 }
 
 /* (旧的积木条/比多少/凑十法 Canvas 代码已替换为上面的实物 DOM 游戏) */
+
+/* ---------- 凑十法：实物拆分 ---------- */
+function updateMake10(){
+  let a=Math.min(18,Math.max(0,+$('m10a').value||0));
+  let b=Math.min(18,Math.max(0,+$('m10b').value||0));
+  $('m10a').value=a; $('m10b').value=b;
+  const total=a+b;
+  const stage=$('m10Stage');
+
+  /* 不需要凑十的情况：a 已经 >= 10 或 b=0 或 a+b<=10 */
+  if(a>=10 || b===0 || total<=10){
+    let h='<div class="m10-simple">';
+    if(b===0) h+=`<b>${a}</b> + <b>0</b> = <b>${total}</b><br>加 0 等于没加，直接就是 <b>${a}</b>！`;
+    else if(a>=10) h+=`<b>${a}</b> 已经超过 10 了，直接加：<b>${a} + ${b} = ${total}</b>`;
+    else h+=`<b>${a} + ${b} = ${total}</b><br>结果没超过 10，直接数就行，不用特意凑十～`;
+    h+='</div>';
+    stage.innerHTML=h;
+    $('m10Formula').innerHTML=`${a} <b>+</b> ${b} <b>=</b> ${total}`;
+    $('m10Explain').innerHTML='这种情况下不用凑十法，直接算更简单哦！';
+    return;
+  }
+
+  /* 凑十：need = 把 a 补到 10 需要几个；rest = b 里剩下的 */
+  const need=10-a;          // 凑十需要补的
+  const rest=b-need;        // b 拆完后剩下的（可能为负，但前面已排除）
+  const T=10;               // 凑成的整十
+
+  /* 构建三组糖果可视化 */
+  let h='';
+
+  /* 第一组：原来的 a 颗（蓝色） */
+  h+=`<div class="m10-row">
+    <div class="m10-group"><div class="m10-label">原来有 ${a} 🍬</div>
+      <div class="m10-cands">`;
+  for(let i=0;i<a;i++) h+=`<span class="m10-cand" style="animation-delay:${(i*0.04).toFixed(2)}s">🍬</span>`;
+  h+=`</div></div>`;
+
+  /* 第二组：从 b 里拆出 need 颗来凑十（绿色→高亮） */
+  h+=`<span class="m10-arrow">＋</span>`;
+  h+=`<div class="m10-group" style="border-color:#18c2b8"><div class="m10-label" style="color:#0a9e8a">拿出 ${need} 颗凑整十</div>
+      <div class="m10-cands">`;
+  for(let i=0;i<need;i++) h+=`<span class="m10-cand" style="animation-delay:${(a*0.04+i*0.04).toFixed(2)}s;color:#18c2b8;transform:scale(1.1)">🍬</span>`;
+  h+=`</div></div>`;
+
+  /* 整十线 */
+  h+=`</div><div class="m10-ten-line"></div>`;
+
+  /* 第三行：整十 + 剩余 */
+  h+=`<div class="m10-row">
+    <div class="m10-group" style="border-color:var(--purple);background:linear-gradient(135deg,#f3efff,#ede5ff)">
+      <div class="m10-label" style="color:var(--purple)">凑成整十 → ${T} 🍬</div>
+      <div class="m10-cands">`;
+  for(let i=0;i<T;i++) h+=`<span class="m10-cand" style="animation-delay:${(0.3+i*0.03).toFixed(2)}s">🍬</span>`;
+  h+=`</div><div class="m10-bracket">= ${T}</div></div>`;
+
+  if(rest > 0){
+    h+=`<span class="m10-arrow">＋</span>`;
+    h+=`<div class="m10-group"><div class="m10-label">还剩 ${rest} 🍬</div>
+        <div class="m10-cands">`;
+    for(let i=0;i<rest;i++) h+=`<span class="m10-cand" style="animation-delay:${(0.6+i*0.04).toFixed(2)}s">🍬</span>`;
+    h+=`</div><div class="m10-bracket">= ${rest}</div></div>`;
+    h+=`<span class="m10-arrow">＝</span>`;
+    h+=`<div class="m10-group" style="border-color:var(--purple);background:linear-gradient(135deg,#f3efff,#ede5ff);min-width:70px">
+        <div class="m10-bracket" style="font-size:28px">${total}</div>
+        <div class="m10-label" style="color:var(--purple)">一共 ${total}</div></div>`;
+  } else {
+    h+=`<span class="m10-arrow">＝</span>`;
+    h+=`<div class="m10-bracket" style="font-size:28px;color:var(--purple)">${total}</div>`;
+  }
+  h+='</div>';
+
+  /* 拆分算式说明 */
+  h+=`<div class="m10-split-note">✂️ 把 ${b} 拆成 <b>${need}</b> 和 <b>${rest}</b>：先拿 ${need} 颗和 ${a} 凑成 10，再加剩下的 ${rest}</div>`;
+
+  stage.innerHTML=h;
+
+  /* 公式和解释 */
+  $('m10Formula').innerHTML=`${a} <b>+</b> ${b} <b>=</b> ${total}`;
+  $('m10Explain').innerHTML=
+    `<b>第一步：</b>${a} 还差 <b>${need}</b> 就到 10，所以从 ${b} 里借 <b>${need}</b> 个出来 → ${a}+${need}=<b>${T}</b>（整十！）<br>`+
+    `<b>第二步：</b>${b} 借走 ${need} 后还剩 <b>${rest}</b> 个，${T}+${rest}=<b>${total}</b><br>`+
+    `📝 完整算式：<b>${a}+${b} = ${a}+${need}+${rest} = ${T}+${rest} = ${total}</b>`;
+  earn('add');
+}
 
 /* ---------- 乘除法·实物互动游戏 ---------- */
 let mulMode='mul', shareStep=0, bagStep=0;
