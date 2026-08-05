@@ -321,8 +321,6 @@
   .mt-cn-head{ background:linear-gradient(135deg,#ff7043,#ff5252); color:#fff; font-size:15px; font-weight:800; padding:7px 2px; text-align:center; border-radius:6px; }
   .mt-cn-rowlab{ background:linear-gradient(135deg,#ff7043,#ff5252); color:#fff; font-size:15px; font-weight:800; padding:7px 2px; text-align:center; border-radius:6px; }
   .mt-kj{ border:1px solid rgba(0,0,0,.08); border-radius:6px; padding:6px 1px; text-align:center; transition:.15s; cursor:default; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.15; box-shadow:0 1px 2px rgba(0,0,0,.08); }
-  .mt-kj .kj{ font-size:12px; font-weight:700; color:#fff; letter-spacing:.5px; }
-  .mt-kj .kj-ans{ font-size:16px; font-weight:900; color:#fff; }
   .mt-empty{ }
 
 </style>
@@ -1316,16 +1314,12 @@ function renderMultable(){
       const cls=isDiag?' diag':'';
       const bg='hsl('+hue+','+sat+'%,'+light+'%)';
       h+='<div class="mt-cell'+cls+'" style="background:'+bg+'" title="'+row+' × '+col+' = '+prod+'">'
-        +'<span class="mt-eq">'+row+'×'+col+'</span>'
+        +'<span class="mt-eq">'+row+'×'+col+'=</span>'
         +'<span class="mt-ans">'+prod+'</span></div>';
     }
   }
   grid.innerHTML=h;
   $('multableExplain').innerHTML='<b>🌈 12×12 彩色彩律：</b>🔶 对角线（完全平方）橙色描边高亮：1,4,9…144 🔶 关于对角线对称的格子答案相同 🔶 颜色从蓝→青→绿→黄→橙，积越大颜色越暖，答案写在每格下方';
-}
-function koujue(a,b){
-  const p=a*b;
-  return p<10 ? (a+''+b+'得'+p) : (a+''+b+p);
 }
 function renderMultableCN(){
   const grid=$('multableCN'); let h='';
@@ -1341,14 +1335,13 @@ function renderMultableCN(){
       const light=isDiag?60:55;
       const sat=Math.round(72+(prod/81)*20);
       const bg='hsl('+hue+','+sat+'%,'+light+'%)';
-      const kj=koujue(row,col);
       h+='<div class="mt-kj'+ (isDiag?' diag':'') +'" style="background:'+bg+'" title="'+row+' × '+col+' = '+prod+'">'
-        +'<span class="kj">'+kj+'</span>'
-        +'<span class="kj-ans">'+prod+'</span></div>';
+        +'<span class="mt-eq">'+row+'×'+col+'=</span>'
+        +'<span class="mt-ans">'+prod+'</span></div>';
     }
   }
   grid.innerHTML=h;
-  $('multableExplain').innerHTML='<b>🇨🇳 9×9 中国口诀（小九九）：</b>每行只从「本数」开始向右排（上三角），口诀读法如「二三得六」「三四十二」——个位结果带「得」，十位结果直接读。被乘数固定、乘数往后数，答案写在每句下面。';
+  $('multableExplain').innerHTML='<b>🇨🇳 9×9 中国口诀（小九九·阶梯式）：</b>用阿拉伯数字、阶梯（上三角）排列——每行从「本数」开始向右排，左上角留出阶梯空格。每格写出完整算式「几×几=答案」，被乘数固定、乘数往后数。';
 }
 function setMulTableMode(m){
   mtMode=m;
