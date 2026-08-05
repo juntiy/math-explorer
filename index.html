@@ -186,9 +186,11 @@
   .tens-tray .coins{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; max-width:230px; }
   .ten-coin{ font-size:30px; animation:pop .35s backwards; }
   .ten-coin small{ display:block; font-family:'Baloo 2'; font-size:10px; color:var(--orange); }
-  /* ---------- 加减：3D 数轴兔子跳 ---------- */
+  /* ---------- 加减：双色积木条 + 凑十/破十法 ---------- */
   .play-btn{ border:none; background:linear-gradient(90deg,#ff9f43,#ff6b6b); color:#fff; font-family:inherit; font-size:14px; padding:8px 14px; border-radius:12px; cursor:pointer; box-shadow:0 6px 16px rgba(255,111,107,.35); }
   .play-btn:active{ transform:translateY(1px); }
+  .play-btn.tgl{ background:linear-gradient(90deg,#7c5cff,#4d96ff); box-shadow:0 6px 16px rgba(124,92,255,.35); }
+  .play-btn.tgl.on{ background:linear-gradient(90deg,#18c2b8,#2ecc71); box-shadow:0 0 0 3px rgba(24,194,184,.35),0 6px 16px rgba(24,194,184,.35); }
   canvas.nl{ cursor:default; }
   /* ---------- 乘法：线→面 3D 阵列 ---------- */
   .mul3d-wrap{ text-align:center; perspective:800px; margin:6px 0; }
@@ -354,9 +356,11 @@
         <div class="blocks" id="addBlocks"></div>
         <div class="formula num" id="addFormula"></div>
         <canvas class="nl" id="addBar" width="640" height="190"></canvas>
-        <div class="controls" style="justify-content:center;margin-top:8px">
+        <div class="controls" style="justify-content:center;margin-top:8px;gap:10px">
           <button class="play-btn" onclick="animateCombine()">▶ 看它们合起来 / 拿走</button>
+          <button class="play-btn tgl" id="stratBtn" onclick="toggleStrategy()">🧩 凑十/破十法：关</button>
         </div>
+        <div class="mini-cap" style="margin-top:6px">💡 数字变大了看不清？点「凑十/破十法」看怎么拆成整十来算！</div>
         <div class="explain" id="addExplain"></div>
       </div>
     </section>
@@ -707,6 +711,11 @@ function drawBar(canvas, a, b, op, maxN, anim){
   const x0=46, x1=W-24, U=x1-x0;
   const unit=U/maxN, bh=48, yc=70;
   const cA=['#9bbeff','#4d96ff'], cB=['#9be7c9','#18c2b8'], cR=['#ffb3c1','#ff6b6b'];
+  // 整十刻度线：帮孩子看清“十位”在哪，数字大了也不慌
+  ctx.save(); ctx.strokeStyle='rgba(124,92,255,.22)'; ctx.lineWidth=1.4; ctx.setLineDash([5,4]);
+  ctx.fillStyle='#a99fe0'; ctx.font='11px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+  for(let t=10;t<=maxN-0.001;t+=10){ const xt=x0+t*unit; ctx.beginPath(); ctx.moveTo(xt,30); ctx.lineTo(xt,yc+bh/2+4); ctx.stroke(); ctx.fillText(t,xt,yc-bh/2-6); }
+  ctx.restore();
   function bar(x,w,c1,c2,label){
     if(w<=0) return;
     const r=Math.min(9,w/2);
@@ -760,26 +769,117 @@ function updateAdd(){
     $('addFormula').innerHTML = `${a} <b>−</b> ${b} <b>=</b> ${result}`;
     $('addExplain').innerHTML = `从 <b>${a}</b> 个里拿走 <b>${taken}</b> 个，还剩 <b>${result}</b> 个。减法就是“越拿越少”。`;
   }
-  drawBar($('addBar'), a, b, op, Math.max(a+b, a, b, 10), 0);
+  if(addStrategy) drawStrategy($('addBar'), a, b, op, Math.max(a+b, a, b, 10), 0);
+  else drawBar($('addBar'), a, b, op, Math.max(a+b, a, b, 10), 0);
+  if(addStrategy){
+    if(op==='+'){
+      const need=(a%10===0)?10:(10-(a%10));
+      $('addExplain').innerHTML = (need<=b && b>0)
+        ? `先拿 <b>${need}</b> 个和 <b>${a}</b> 凑成 <b>${a+need}</b>（整十），再加剩下的 <b>${b-need}</b> 个，一共 <b>${a+b}</b>。这就是“凑十法”！`
+        : `<b>${a} + ${b}</b> 直接合起来就是 <b>${a+b}</b>，不用特意凑十～`;
+    } else {
+      const ones=a%10, tens=a-ones, take=Math.min(b,a);
+      $('addExplain').innerHTML = (tens>0 && take>ones)
+        ? `先把 <b>${a}</b> 减 <b>${ones}</b> 退到整十 <b>${tens}</b>，再减 <b>${take-ones}</b>，得到 <b>${a-take}</b>。这就是“破十 / 平十法”！`
+        : `从 <b>${a}</b> 里拿走 <b>${take}</b> 个，还剩 <b>${a-take}</b> 个。`;
+    }
+  }
   earn('add');
 }
 
 /* 积木条：合起来 / 拿走 */
-let barRAF=null;
+let barRAF=null, addStrategy=false;
 function animateCombine(){
   const a=+$('addA').value||0, b=+$('addB').value||0, op=$('addOp').value;
   const maxN=Math.max(a+b,a,b,10);
   const canvas=$('addBar'); const dur=900; let t0=null;
   cancelAnimationFrame(barRAF);
+  const plus = op==='+';
   function frame(t){
     if(t0===null) t0=t;
     const p=Math.min(1,(t-t0)/dur); const e=1-Math.pow(1-p,3);
-    if(op==='+') drawBar(canvas,a,b,op,maxN, 70*(1-e));
-    else drawBar(canvas,a,b,op,maxN, 70*e);
+    if(addStrategy){
+      if(plus) drawStrategy(canvas,a,b,op,maxN, 60*(1-e));
+      else drawStrategy(canvas,a,b,op,maxN, 0);
+    } else {
+      if(plus) drawBar(canvas,a,b,op,maxN, 60*(1-e));
+      else drawBar(canvas,a,b,op,maxN, 60*e);
+    }
     if(p<1) barRAF=requestAnimationFrame(frame);
-    else drawBar(canvas,a,b,op,maxN,0);
+    else (addStrategy?drawStrategy:drawBar)(canvas,a,b,op,maxN,0);
   }
   barRAF=requestAnimationFrame(frame);
+}
+function toggleStrategy(){
+  addStrategy=!addStrategy;
+  const btn=$('stratBtn'); btn.classList.toggle('on',addStrategy);
+  btn.textContent = addStrategy ? '🧩 凑十/破十法：开' : '🧩 凑十/破十法：关';
+  updateAdd();
+}
+function drawStrategy(canvas, a, b, op, maxN, anim){
+  const ctx=canvas.getContext('2d'); const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  maxN=Math.max(maxN,10);
+  const x0=46, x1=W-24, U=x1-x0, unit=U/maxN, bh=48, yc=82;
+  const cA=['#9bbeff','#4d96ff'], cB=['#9be7c9','#18c2b8'], cC=['#bfeaff','#4dc3ff'], cR=['#ffb3c1','#ff6b6b'];
+  function bar(x,w,c1,c2,label){
+    if(w<=0) return;
+    const r=Math.min(9,w/2);
+    const g=ctx.createLinearGradient(x,yc-bh/2,x,yc+bh/2); g.addColorStop(0,c1); g.addColorStop(1,c2);
+    ctx.fillStyle=g; ctx.beginPath(); ctx.moveTo(x+r,yc-bh/2);
+    ctx.arcTo(x+w,yc-bh/2,x+w,yc+bh/2,r); ctx.arcTo(x+w,yc+bh/2,x,yc+bh/2,r);
+    ctx.arcTo(x,yc+bh/2,x,yc-bh/2,r); ctx.arcTo(x,yc-bh/2,x+w,yc-bh/2,r); ctx.closePath(); ctx.fill();
+    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 16px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x+w/2,yc); }
+  }
+  function takenRect(x,w){
+    if(w<=0) return;
+    ctx.fillStyle='rgba(255,107,107,.30)'; ctx.fillRect(x, yc-bh/2, w, bh);
+    ctx.strokeStyle='#ff6b6b'; ctx.lineWidth=2; ctx.setLineDash([4,3]); ctx.strokeRect(x, yc-bh/2, w, bh); ctx.setLineDash([]);
+  }
+  function vline(v,color,label){
+    const x=x0+v*unit; ctx.strokeStyle=color; ctx.lineWidth=1.6; ctx.setLineDash([5,5]);
+    ctx.beginPath(); ctx.moveTo(x,30); ctx.lineTo(x,yc+bh/2+4); ctx.stroke(); ctx.setLineDash([]);
+    if(label){ ctx.fillStyle=color; ctx.font='bold 12px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='bottom'; ctx.fillText(label,x,28); }
+  }
+  function bracket(x,w,label,color){
+    if(w<=0) return; ctx.strokeStyle=color||'#7c5cff'; ctx.lineWidth=2; const yb=yc+bh/2+12;
+    ctx.beginPath(); ctx.moveTo(x,yb); ctx.lineTo(x,yb+7); ctx.lineTo(x+w,yb+7); ctx.lineTo(x+w,yb); ctx.stroke();
+    ctx.fillStyle=color||'#7c5cff'; ctx.font='bold 15px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(label,x+w/2,yb+10);
+  }
+  if(op==='+'){
+    const need=(a%10===0)?10:(10-(a%10)), gap=(anim==null?0:anim);
+    if(need>b || b===0){
+      bar(x0, a*unit, cA[0],cA[1], a); bar(x0+a*unit, b*unit, cB[0],cB[1], b);
+      bracket(x0, (a+b)*unit, '= '+(a+b));
+      ctx.fillStyle='#2b2d42'; ctx.font='bold 15px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top'; ctx.fillText('这个直接加就够啦～', W-20, 12);
+      return;
+    }
+    const rest=b-need, T=a+need;
+    bar(x0, a*unit, cA[0],cA[1], a);
+    bar(x0+a*unit, need*unit, cB[0],cB[1], need);
+    bar(x0+T*unit+8+gap, rest*unit, cC[0],cC[1], rest);
+    vline(T, '#7c5cff', '凑成 '+T);
+    bracket(x0, T*unit, T, '#7c5cff');
+    if(rest>0) bracket(x0+T*unit+8, rest*unit, rest, '#4dc3ff');
+    ctx.fillStyle='#2b2d42'; ctx.font='bold 15px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillText(`${a} + ${b} = ${a}+${need}+${rest} = ${T}+${rest} = ${a+b}`, W-20, 12);
+  } else {
+    const ones=a%10, tens=a-ones, take=Math.min(b,a);
+    if(tens>0) vline(tens, 'rgba(124,92,255,.5)', String(tens));
+    if(take<=ones){
+      bar(x0, a*unit, cA[0],cA[1], a); takenRect(x0+(a-take)*unit, take*unit);
+      bracket(x0, (a-take)*unit, '= '+(a-take));
+      ctx.fillStyle='#2b2d42'; ctx.font='bold 15px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top'; ctx.fillText(`${a} − ${b} = ${a-b}`, W-20, 12);
+    } else {
+      const after=take-ones;
+      bar(x0, a*unit, cA[0],cA[1], a);
+      takenRect(x0+tens*unit, ones*unit);
+      takenRect(x0+(tens-after)*unit, after*unit);
+      bracket(x0, (tens-after)*unit, '= '+(a-take), '#4dc3ff');
+      ctx.fillStyle='#2b2d42'; ctx.font='bold 15px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
+      ctx.fillText(`${a} − ${b} = ${a}−${ones}−${after} = ${tens}−${after} = ${a-b}`, W-20, 12);
+    }
+  }
 }
 
 /* ---------- 乘除法 ---------- */
