@@ -854,6 +854,7 @@ function show(id){
   if(id==='ch-area') updateArea();
   if(id==='ch-geo'){ buildPolyBtns(); buildSolidBtns(); selectPoly('square'); selectSolid('cube'); buildCircle(+$('circleN').value); }
   if(id==='ch-pattern'){ buildMTable(); fracReset(); }
+  if(id==='ch-multable') renderMultable();
 }
 
 /* ---------- 数字的产生 ---------- */
