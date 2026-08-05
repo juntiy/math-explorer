@@ -1738,23 +1738,23 @@ const PYRAMID_SVG=`<polygon points="110,20 200,150 110,190 20,150" fill="rgba(25
 let geo3dType='cube';
 const GEO3D={
   cube:{ name:'正方体', inputs:[{k:'a',label:'棱长 a',min:1,max:12,def:4}],
-    calc:d=>{const a=d.a; return { formula:`体积 V = a³ = <b>${a}³ = ${a*a*a}</b>　|　表面积 S = 6 a² = <b>6 × ${a*a} = ${6*a*a}</b>`, explain:`正方体 6 个面都是一样的正方形（a×a），所以表面积 = 6 个 a²；体积 = 长×宽×高 = a³。` };},
-    html:d=>{ return `<div class="geo-illust">${svgCube()}</div>`; } },
+    calc:d=>{const a=d.a; return { formula:`体积 V = a\u00B3 = <b>${a}\u00B3=${a*a*a}</b>　|　表面积 S = 6a\u00B2 = <b>6\u00D7${a*a}=${6*a*a}</b>`, explain:`正方体6个面都是相同的正方形(a\u00D7a)，表面积=6个a\u00B2；体积=长\u00D7宽\u00D7高=a\u00B3。` };},
+    html:d=>{ return '<div class="geo-illust">'+svgCube()+'</div>'; } },
   cuboid:{ name:'长方体', inputs:[{k:'a',label:'长 a',min:1,max:12,def:6},{k:'b',label:'宽 b',min:1,max:12,def:4},{k:'c',label:'高 c',min:1,max:12,def:5}],
-    calc:d=>{const{a,b,c}=d; return { formula:`体积 V = a×b×c = <b>${a*b*c}</b>　|　表面积 S = 2(ab+bc+ca) = <b>${2*(a*b+b*c+c*a)}</b>`, explain:`长方体体积 = 长×宽×高；表面积 = 前后、左右、上下六个面加起来。` };},
-    html:d=>{ return `<div class="geo-illust">${svgCuboid()}</div>`; } },
+    calc:d=>{const{a,b,c}=d; return { formula:`体积 V = a\u00D7b\u00D7c = <b>${a*b*c}</b>　|　表面积 S = 2(ab+bc+ca) = <b>${2*(a*b+b*c+c*a)}</b>`, explain:`长方体体积=长\u00D7宽\u00D7高；表面积=前后、左右、上下六个面之和。` };},
+    html:d=>{ return '<div class="geo-illust">'+svgCuboid()+'</div>'; } },
   cylinder:{ name:'圆柱', inputs:[{k:'r',label:'底面半径 r',min:1,max:12,def:4},{k:'h',label:'高 h',min:1,max:12,def:6}],
-    calc:d=>{const r=d.r,h=d.h,V=Math.PI*r*r*h,S=2*Math.PI*r*(h+r); return { formula:`体积 V = π r² h = π×${r*r}×${h} ≈ <b>${V.toFixed(1)}</b>　|　表面积 S = 2πr(h+r) ≈ <b>${S.toFixed(1)}</b>`, explain:`圆柱体积 = 底面积(πr²) × 高；侧面展开是个长方形（长=底面周长 2πr，宽=h）。` };},
-    html:d=>{ return `<div class="geo-illust">${svgCylinder()}</div>`; } },
+    calc:d=>{const r=d.r,h=d.h,V=Math.PI*r*r*h,S=2*Math.PI*r*(h+r); return { formula:`体积 V = \u03C0r\u00B2h = \u03C0\u00D7${r*r}\u00D7${h} \u2248 <b>${V.toFixed(1)}</b>　|　表面积 S = 2\u03C0r(h+r) \u2248 <b>${S.toFixed(1)}</b>`, explain:`圆柱体积=底面积(\u03C0r\u00B2)\u00D7高；侧面展开是长方形(长=周长2\u03C0r，宽=h)。` };},
+    html:d=>{ return '<div class="geo-illust">'+svgCylinder()+'</div>'; } },
   cone:{ name:'圆锥', inputs:[{k:'r',label:'底面半径 r',min:1,max:12,def:4},{k:'h',label:'高 h',min:1,max:12,def:6}],
-    calc:d=>{const r=d.r,h=d.h,l=Math.sqrt(r*r+h*h),V=Math.PI*r*r*h/3,S=Math.PI*r*(r+l); return { formula:`体积 V = ⅓ π r² h = ⅓×π×${r*r}×${h} ≈ <b>${V.toFixed(1)}</b>　|　表面积 S = π r(r+l) ≈ <b>${S.toFixed(1)}</b>`, explain:`圆锥体积 = 同底等高圆柱体积的 ⅓；母线 l = √(r²+h²)。` };},
-    html:d=>{ return `<div class="geo-illust">${svgCone()}</div>`; } },
+    calc:d=>{const r=d.r,h=d.h,l=Math.sqrt(r*r+h*h),V=Math.PI*r*r*h/3,S=Math.PI*r*(r+l); return { formula:`体积 V = \u2153\u03C0r\u00B2h = \u2153\u00D7\u03C0\u00D7${r*r}\u00D7${h} \u2248 <b>${V.toFixed(1)}</b>　|　表面积 S = \u03C0r(r+l) \u2248 <b>${S.toFixed(1)}</b>`, explain:`圆锥体积=同底等高圆柱体积的\u2153；母线l=\u221A(r\u00B2+h\u00B2)。` };},
+    html:d=>{ return '<div class="geo-illust">'+svgCone()+'</div>'; } },
   ball:{ name:'球体', inputs:[{k:'r',label:'半径 r',min:1,max:12,def:5}],
-    calc:d=>{const r=d.r,V=4/3*Math.PI*r*r*r,S=4*Math.PI*r*r; return { formula:`体积 V = 4/3 π r³ = 4/3×π×${r*r*r} ≈ <b>${V.toFixed(1)}</b>　|　表面积 S = 4π r² ≈ <b>${S.toFixed(1)}</b>`, explain:`球体积 = 4/3 π r³，表面积 = 4π r²（像包住球的那层皮）。` };},
-    html:d=>{ return `<div class="geo-illust">${svgSphere()}</div>`; } },
+    calc:d=>{const r=d.r,V=4/3*Math.PI*r*r*r,S=4*Math.PI*r*r; return { formula:`体积 V = 4/3 \u03C0r\u00B3 = 4/3\u00D7\u03C0\u00D7${r*r*r} \u2248 <b>${V.toFixed(1)}</b>　|　表面积 S = 4\u03C0r\u00B2 \u2248 <b>${S.toFixed(1)}</b>`, explain:`球体积=4/3 \u03C0r\u00B3，表面积=4\u03C0r\u00B2（像包住球的那层皮）。` };},
+    html:d=>{ return '<div class="geo-illust">'+svgSphere()+'</div>'; } },
   pyramid:{ name:'四棱锥', inputs:[{k:'a',label:'底边长 a',min:1,max:12,def:5},{k:'h',label:'高 h',min:1,max:12,def:6}],
-    calc:d=>{const a=d.a,h=d.h,V=a*a*h/3; return { formula:`体积 V = ⅓ × 底面积 × 高 = ⅓ × a² × h = ⅓×${a*a}×${h} = <b>${V.toFixed(1)}</b>`, explain:`棱锥体积 = ⅓ × 底面积 × 高（和圆锥一样，都是同底柱体的 ⅓）。` };},
-    html:d=>{ return `<div class="geo-illust">${svgPyramid()}</div>`; } }
+    calc:d=>{const a=d.a,h=d.h,V=a*a*h/3; return { formula:`体积 V = \u2153 \u00D7 底面积 \u00D7 高 = \u2153\u00D7a\u00B2\u00D7h = \u2153\u00D7${a*a}\u00D7${h} = <b>${V.toFixed(1)}</b>`, explain:`棱锥体积=\u2153\u00D7底面积\u00D7高（和圆锥一样，都是同底柱体的\u2153）。` };},
+    html:d=>{ return '<div class="geo-illust">'+svgPyramid()+'</div>'; } }
 };
 function scaleWrap(k,inner){ return `<div class="scaleWrap" style="transform:scale(${k})">${inner}</div>`; }
 function buildGeo3dBtns(){
