@@ -155,11 +155,28 @@
   .arr-grid{ display:flex; flex-direction:column; gap:3px; }
   .arr-row{ display:flex; gap:3px; }
   .oddcell{ width:26px; height:26px; border-radius:6px; box-shadow:inset 0 -2px 0 rgba(0,0,0,.14); animation:pop .25s backwards; }
-  .gauss-stage{ display:flex; gap:26px; align-items:flex-end; justify-content:center; flex-wrap:wrap; margin:10px 0; min-height:230px; }
-  .gauss-half{ display:flex; flex-direction:column; gap:3px; transition:transform .6s; }
-  .gauss-row{ display:flex; gap:3px; }
-  .gauss-row .blk{ width:18px; height:18px; }
-  .gauss-half.flip{ transform:scaleY(-1); }
+  .gauss-stage{ display:flex; gap:24px; align-items:center; justify-content:center; flex-wrap:wrap; margin:14px 0; min-height:250px; }
+  .gauss-cap{ text-align:center; font-size:14px; color:var(--ink-soft); min-height:22px; margin:8px 2px; }
+  .gauss-placeholder{ font-family:"Baloo 2"; font-size:54px; }
+  /* 拼长方形法 */
+  .gauss-rect-wrap{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .gauss-rect{ display:grid; gap:2px; padding:8px; background:#fff; border-radius:10px; box-shadow:0 4px 16px rgba(80,90,160,.16); }
+  .gauss-rect .cell{ width:16px; height:16px; border-radius:3px; }
+  .gauss-rect .cell.a{ background:linear-gradient(135deg,#7c5cff,#4d96ff); }
+  .gauss-rect .cell.b{ background:linear-gradient(135deg,#5fe0d6,#18c2b8); opacity:0; transform:translateY(-8px) scale(.5); transition:opacity .45s ease, transform .45s ease; }
+  .gauss-rect.show .cell.b{ opacity:1; transform:none; }
+  .gauss-rlabel{ font-size:13px; font-weight:800; color:var(--ink); background:#eef1ff; border-radius:8px; padding:5px 11px; }
+  .gauss-rlabel.b{ background:#e6fbf8; color:#0e9b8e; }
+  /* 配对法 */
+  .gauss-pair{ display:flex; gap:14px; align-items:flex-end; justify-content:center; flex-wrap:wrap; max-width:840px; margin:0 auto; }
+  .pair-grp{ display:flex; flex-direction:column; align-items:center; gap:5px; opacity:0; transform:translateY(12px); transition:opacity .4s ease, transform .4s ease; }
+  .gauss-pair.show .pair-grp{ opacity:1; transform:none; }
+  .pair-top{ display:flex; align-items:center; gap:4px; }
+  .gauss-chip{ width:36px; height:36px; border-radius:9px; background:linear-gradient(135deg,#7c5cff,#4d96ff); color:#fff; font-weight:800; font-size:16px; display:flex; align-items:center; justify-content:center; font-family:"Baloo 2"; }
+  .gauss-chip.mid{ background:linear-gradient(135deg,#ff9f43,#ff7043); }
+  .pair-plus{ font-weight:800; color:var(--ink-soft); font-size:15px; }
+  .pair-sum{ font-size:12px; font-weight:800; color:#0e9b8e; background:#e6fbf8; border-radius:7px; padding:2px 8px; }
+  .pair-sum.mid{ color:#e8590c; background:#fff0e6; }
   .mtable{ display:grid; grid-template-columns:repeat(12,1fr); gap:3px; perspective:600px; max-width:560px; margin:10px auto; }
   .mtbar{ transform:rotateX(40deg); transform-origin:bottom; border-radius:4px 4px 0 0; transition:.2s; display:flex; align-items:flex-end; justify-content:center; color:#fff; font-size:9px; font-family:'Baloo 2'; }
   .mtbar:hover{ filter:brightness(1.15); }
@@ -779,14 +796,22 @@
           <div class="formula num" id="oddFb"></div>
         </div>
 
-        <!-- 模块2 -->
+        <!-- 模块2：高斯求和 -->
         <div class="pat-panel" id="pat-m2">
-          <h3 style="font-size:18px">➕ 高斯求和：把梯形“翻过来”拼成长方形</h3>
-          <p class="lead">1+2+…+N 不用死算！搭一个阶梯梯形，复制一个倒扣的拼上去，瞬间变成一个整齐的长方形。拖动选 N，再点“魔法拼合”。</p>
-          <div class="controls" style="justify-content:center">
-            <label class="ctrl">N = <span id="gaussNV" class="num">10</span><input type="range" id="gaussN" min="1" max="100" value="10" oninput="$('gaussNV').textContent=this.value"></label>
-            <button class="act" onclick="gaussFold()">✨ 魔法拼合</button>
+          <h3 style="font-size:18px">➕ 高斯求和：1+2+…+N 的两种妙法</h3>
+          <p class="lead">不用死算！这里有两种方法看懂 1+2+…+N：<b>🤝 配对法</b>（高斯自己用的）把头尾配成一对；<b>⬛ 拼长方形法</b>把阶梯复制一份倒扣拼成长方形。拖动选 N，再点按钮看动画。</p>
+          <div class="controls" style="justify-content:center;flex-wrap:wrap;gap:10px">
+            <label class="ctrl">N = <span id="gaussNV" class="num">10</span><input type="range" id="gaussN" min="1" max="100" value="10" oninput="$('gaussNV').textContent=this.value; gaussRender();"></label>
+            <div class="seg">
+              <button class="seg-btn on" id="gaussSegPair" onclick="setGaussMode('pair')">🤝 配对法</button>
+              <button class="seg-btn" id="gaussSegRect" onclick="setGaussMode('rect')">⬛ 拼长方形法</button>
+            </div>
           </div>
+          <div class="controls" style="justify-content:center;gap:10px">
+            <button class="act" id="gaussPlayBtn" onclick="gaussPlay()">✨ 看动画</button>
+            <button class="act alt" onclick="gaussReset()">↺ 重置</button>
+          </div>
+          <div class="gauss-cap" id="gaussCap"></div>
           <div class="gauss-stage" id="gaussStage"></div>
           <div class="formula num" id="gaussFb"></div>
         </div>
@@ -865,7 +890,7 @@ function show(id){
   if(id==='ch-sqrt') updateSqrt();
   if(id==='ch-area') updateArea();
   if(id==='ch-geo'){ buildPolyBtns(); buildSolidBtns(); selectPoly('square'); selectSolid('cube'); buildCircle(+$('circleN').value); }
-  if(id==='ch-pattern'){ buildMTable(); fracReset(); }
+  if(id==='ch-pattern'){ buildMTable(); fracReset(); gaussRender(); }
   if(id==='ch-multable') renderMultable();
 }
 
@@ -1568,6 +1593,7 @@ function setPatTab(t){
   document.querySelectorAll('.pat-tab').forEach(b=> b.classList.toggle('on', b.dataset.t===t));
   document.querySelectorAll('.pat-panel').forEach(p=> p.classList.toggle('on', p.id==='pat-'+t));
   if(t==='m3') buildMTable();
+  if(t==='m2') gaussRender();
 }
 
 /* 模块1-1：自动排队（因数 / 质数 / 三角数） */
@@ -1624,27 +1650,102 @@ function oddStep(){
   sfx('ok'); earn('pattern');
 }
 
-/* 模块2：高斯求和 梯形拼合 */
-function gaussFold(){
-  const N = Math.max(1, Math.min(100, +$('gaussN').value||10));
-  const stage=$('gaussStage'); stage.innerHTML='';
-  const total=N*(N+1)/2;
-  const makeHalf=(flip,color)=>{
-    const h=document.createElement('div'); h.className='gauss-half'+(flip?' flip':'');
-    if(N<=22){
-      for(let r=1;r<=N;r++){
-        const row=document.createElement('div'); row.className='gauss-row';
-        for(let c=0;c<r;c++){ const b=document.createElement('div'); b.className='blk'; if(color) b.style.background=color; row.appendChild(b); }
-        h.appendChild(row);
-      }
-    } else {
-      const ph=document.createElement('div'); ph.style.cssText='font-family:Baloo 2;font-size:46px;'+(flip?'color:var(--teal)':'color:var(--purple)'); ph.textContent='🪜'; h.appendChild(ph);
+
+/* 模块2：高斯求和 —— 配对法 + 拼长方形法 */
+let gaussMode='pair';
+function gaussN(){ return Math.max(1, Math.min(100, +$('gaussN').value||10)); }
+function setGaussMode(m){
+  gaussMode=m;
+  $('gaussSegPair').classList.toggle('on', m==='pair');
+  $('gaussSegRect').classList.toggle('on', m==='rect');
+  $('gaussPlayBtn').textContent = m==='rect' ? '✨ 拼合！' : '✨ 配对！';
+  gaussRender();
+}
+function gaussRender(){ if(gaussMode==='rect') gaussRectStatic(); else gaussPairStatic(); }
+function gaussPlay(){ if(gaussMode==='rect') gaussRectPlay(); else gaussPairPlay(); }
+function gaussReset(){ gaussRender(); }
+
+/* —— 拼长方形法 —— */
+function gaussRectStatic(){
+  const N=gaussN(), total=N*(N+1)/2, stage=$('gaussStage'); stage.innerHTML='';
+  if(N>24){
+    stage.innerHTML='<div class="gauss-placeholder">🪜</div>';
+    $('gaussCap').innerHTML='N 太大啦，直接用公式：1+…+'+N+' = '+N+'×'+(N+1)+'÷2 = <b>'+total+'</b>。把 N 调到 24 以内看动画～';
+    $('gaussFb').innerHTML=''; return;
+  }
+  const wrap=document.createElement('div'); wrap.className='gauss-rect-wrap';
+  const rowFlex=document.createElement('div'); rowFlex.style.cssText='display:flex;align-items:center;gap:8px';
+  const vlabel=document.createElement('div'); vlabel.className='gauss-rlabel'; vlabel.textContent='⬇ '+N+' 行';
+  const rect=document.createElement('div'); rect.className='gauss-rect'; rect.style.gridTemplateColumns='repeat('+(N+1)+',16px)';
+  for(let r=0;r<N;r++){
+    for(let c=0;c<=N;c++){
+      const cell=document.createElement('div'); cell.className='cell '+(c<=r?'a':'b');
+      if(c>r) cell.style.transitionDelay=((c+r)*12)+'ms';
+      rect.appendChild(cell);
     }
-    return h;
-  };
-  stage.appendChild(makeHalf(false, null));
-  stage.appendChild(makeHalf(true, 'linear-gradient(135deg,#5fe0d6,#18c2b8)'));
-  $('gaussFb').innerHTML = `1+2+…+${N} 的和 = 一个 <b>${N}</b> 行 × <b>${N+1}</b> 列的长方形 ÷ 2 = <b>${N} × ${N+1} ÷ 2 = ${total}</b>。1 到 100 就是 100×101÷2 = <b>5050</b>！`;
+  }
+  rowFlex.appendChild(vlabel); rowFlex.appendChild(rect);
+  const hlabel=document.createElement('div'); hlabel.className='gauss-rlabel b'; hlabel.textContent='➡ '+(N+1)+' 列（每份多 1）';
+  wrap.appendChild(rowFlex); wrap.appendChild(hlabel); stage.appendChild(wrap);
+  $('gaussCap').innerHTML='👈 这是 <b>1 份</b>阶梯（1+2+…+'+N+'）。点「拼合！」复制一份旋转 180° 补到右上方，拼成长方形。';
+  $('gaussFb').innerHTML='';
+}
+function gaussRectPlay(){
+  const N=gaussN(), total=N*(N+1)/2, area=N*(N+1);
+  gaussRectStatic();
+  if(N>24){ $('gaussFb').innerHTML='长方形 = <b>'+area+'</b> 格 = 两份 1+2+…+'+N+'，所以 1 份 = '+area+' ÷ 2 = <b>'+total+'</b>。'; return; }
+  const rect=$('gaussStage').querySelector('.gauss-rect');
+  if(rect) requestAnimationFrame(function(){ rect.classList.add('show'); });
+  $('gaussCap').innerHTML='✅ 两份拼成 <b>'+N+' 行 × '+(N+1)+' 列</b> 的长方形，共 <b>'+area+'</b> 格。';
+  $('gaussFb').innerHTML='长方形有 <b>'+area+'</b> 格 = <b>两份</b> 1+2+…+'+N+'，所以 1 份 = '+area+' ÷ 2 = <b>'+N+' × '+(N+1)+' ÷ 2 = '+total+'</b>。';
+  sfx('fold'); earn('pattern');
+}
+
+/* —— 配对法（高斯原法） —— */
+function gaussPairStatic(){
+  const N=gaussN(), total=N*(N+1)/2, stage=$('gaussStage'); stage.innerHTML='';
+  if(N>80){
+    stage.innerHTML='<div class="gauss-placeholder">🔢</div>';
+    $('gaussCap').innerHTML='N 太大，直接用公式：1+…+'+N+' = '+N+'×'+(N+1)+'÷2 = <b>'+total+'</b>。';
+    $('gaussFb').innerHTML=''; return;
+  }
+  const wrap=document.createElement('div'); wrap.className='gauss-pair';
+  for(let i=1;i<=N;i++){ const chip=document.createElement('div'); chip.className='gauss-chip'; chip.textContent=i; wrap.appendChild(chip); }
+  stage.appendChild(wrap);
+  $('gaussCap').innerHTML='👈 把 1 到 '+N+' 排成一排。点「配对！」让头尾两两配对。';
+  $('gaussFb').innerHTML='';
+}
+function gaussPairPlay(){
+  const N=gaussN(), total=N*(N+1)/2, mid=(N%2===1)?(N+1)/2:0, P=Math.floor(N/2);
+  if(N>80){ gaussPairStatic(); return; }
+  const stage=$('gaussStage'); stage.innerHTML='';
+  const wrap=document.createElement('div'); wrap.className='gauss-pair';
+  for(let k=1;k<=P;k++){
+    const grp=document.createElement('div'); grp.className='pair-grp'; grp.style.transitionDelay=((k-1)*60)+'ms';
+    const top=document.createElement('div'); top.className='pair-top';
+    const c1=document.createElement('div'); c1.className='gauss-chip'; c1.textContent=k;
+    const plus=document.createElement('div'); plus.className='pair-plus'; plus.textContent='+';
+    const c2=document.createElement('div'); c2.className='gauss-chip'; c2.textContent=N+1-k;
+    top.appendChild(c1); top.appendChild(plus); top.appendChild(c2);
+    const sum=document.createElement('div'); sum.className='pair-sum'; sum.textContent='='+(N+1);
+    grp.appendChild(top); grp.appendChild(sum); wrap.appendChild(grp);
+  }
+  if(mid){
+    const grp=document.createElement('div'); grp.className='pair-grp'; grp.style.transitionDelay=(P*60)+'ms';
+    const top=document.createElement('div'); top.className='pair-top';
+    const c=document.createElement('div'); c.className='gauss-chip mid'; c.textContent=mid;
+    top.appendChild(c);
+    const sum=document.createElement('div'); sum.className='pair-sum mid'; sum.textContent='中间';
+    grp.appendChild(top); grp.appendChild(sum); wrap.appendChild(grp);
+  }
+  stage.appendChild(wrap);
+  requestAnimationFrame(function(){ wrap.classList.add('show'); });
+  $('gaussCap').innerHTML='✅ 头尾配对：每对都 = <b>'+(N+1)+'</b>，共 <b>'+P+'</b> 对'+(mid?(' + 1 个中间数 '+mid):'')+'。';
+  if(mid){
+    $('gaussFb').innerHTML='<b>'+P+'</b> 对 × '+(N+1)+' + 中间 '+mid+' = <b>'+total+'</b>。也就是 (N−1)/2 × (N+1) + (N+1)/2。';
+  } else {
+    $('gaussFb').innerHTML='<b>'+P+'</b> 对 × '+(N+1)+' = <b>'+total+'</b>。这就是「÷2」的来历：N 个数配成 N/2 对！';
+  }
   sfx('fold'); earn('pattern');
 }
 
