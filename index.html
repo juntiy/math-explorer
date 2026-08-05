@@ -731,7 +731,7 @@ function drawBar(canvas, a, b, op, maxN, anim){
     ctx.arcTo(x+w,yc-bh/2,x+w,yc+bh/2,r); ctx.arcTo(x+w,yc+bh/2,x,yc+bh/2,r);
     ctx.arcTo(x,yc+bh/2,x,yc-bh/2,r); ctx.arcTo(x,yc-bh/2,x+w,yc-bh/2,r);
     ctx.closePath(); ctx.fill();
-    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 34px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x+w/2,yc); }
+    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 50px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x+w/2,yc); }
   }
   function bracket(x,w,label){
     if(w<=0) return;
@@ -859,7 +859,7 @@ function drawCompare(canvas, a, b, maxN, anim){
     ctx.fillStyle=g; ctx.beginPath(); ctx.moveTo(x0+r,y-bh/2);
     ctx.arcTo(x0+w,y-bh/2,x0+w,y+bh/2,r); ctx.arcTo(x0+w,y+bh/2,x0,y+bh/2,r);
     ctx.arcTo(x0,y+bh/2,x0,y-bh/2,r); ctx.arcTo(x0,y-bh/2,x0+w,y-bh/2,r); ctx.closePath(); ctx.fill();
-    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 32px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x0+w/2,y); }
+    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 48px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x0+w/2,y); }
   }
   if(small>0){ ctx.fillStyle='rgba(124,92,255,.12)'; ctx.fillRect(x0, yA-bh/2, small*unit, (yB+bh/2)-(yA-bh/2)); }
   bar(yA, a, cMine[0],cMine[1], a);
@@ -893,7 +893,7 @@ function drawStrategy(canvas, a, b, op, maxN, anim){
     ctx.fillStyle=g; ctx.beginPath(); ctx.moveTo(x+r,yc-bh/2);
     ctx.arcTo(x+w,yc-bh/2,x+w,yc+bh/2,r); ctx.arcTo(x+w,yc+bh/2,x,yc+bh/2,r);
     ctx.arcTo(x,yc+bh/2,x,yc-bh/2,r); ctx.arcTo(x,yc-bh/2,x+w,yc-bh/2,r); ctx.closePath(); ctx.fill();
-    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 34px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x+w/2,yc); }
+    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 50px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x+w/2,yc); }
   }
   function takenRect(x,w){
     if(w<=0) return;
