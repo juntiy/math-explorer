@@ -336,7 +336,7 @@
       <div class="card">
         <span class="badge">加减法</span>
         <h2>➕ 加和减，就是“合起来”与“拿走”</h2>
-        <p class="lead">加法 = 把两堆东西合在一起；减法 = 从一堆里拿走一些。下面的积木会真的“飞”到一起或“消失”，数轴上的小兔子也会一步步跳到结果上。</p>
+        <p class="lead">加法 = 把两段长度合在一起；减法 = 从一整段里拿走一段。下面用两条<b>不同颜色</b>的“积木条”来帮忙：先各放一条（蓝=第一个数，绿=第二个数），再<b>合起来</b>看总长；减法时拿走的那段（红）会滑出去。</p>
         <div class="controls">
           <div class="ctrl">第一个数 a
             <input class="field num" id="addA" type="number" value="3" min="0" max="20" oninput="updateAdd()">
@@ -353,9 +353,9 @@
         </div>
         <div class="blocks" id="addBlocks"></div>
         <div class="formula num" id="addFormula"></div>
-        <canvas class="nl" id="addLine" width="640" height="150"></canvas>
+        <canvas class="nl" id="addBar" width="640" height="190"></canvas>
         <div class="controls" style="justify-content:center;margin-top:8px">
-          <button class="play-btn" onclick="animateHop()">▶ 看小兔子跳一跳</button>
+          <button class="play-btn" onclick="animateCombine()">▶ 看它们合起来 / 拿走</button>
         </div>
         <div class="explain" id="addExplain"></div>
       </div>
@@ -700,25 +700,46 @@ function blocks(n, color, delayBase){
   for(let i=0;i<n;i++){ s+=`<span class="blk" style="background:${color};animation-delay:${(delayBase||0)+i*0.03}s"></span>`; }
   return s;
 }
-function drawLine(canvas, a, result, op, maxN){
-  const ctx = canvas.getContext('2d');
-  const W=canvas.width, H=canvas.height;
+function drawBar(canvas, a, b, op, maxN, anim){
+  const ctx=canvas.getContext('2d'); const W=canvas.width,H=canvas.height;
   ctx.clearRect(0,0,W,H);
-  maxN = Math.max(maxN, 12);
-  const pad=34, y=H/2, x0=pad, x1=W-pad;
-  const sx = v => x0 + (x1-x0)*(v/maxN);
-  ctx.strokeStyle='#c9d2e8'; ctx.lineWidth=3;
-  ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
-  ctx.fillStyle='#8893b0'; ctx.font='12px Baloo 2, sans-serif'; ctx.textAlign='center';
-  for(let i=0;i<=maxN;i++){ const x=sx(i); ctx.strokeStyle='#c9d2e8'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(x,y-8); ctx.lineTo(x,y+8); ctx.stroke(); ctx.fillText(i,x,y+26); }
-  const ca=sx(a), cr=sx(result);
-  const col = op==='-' ? '#ff6b6b' : '#2ecc71';
-  ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=4;
-  ctx.beginPath(); ctx.moveTo(ca,y-20); ctx.lineTo(cr,y-20); ctx.stroke();
-  const dir = cr>=ca?1:-1;
-  ctx.beginPath(); ctx.moveTo(cr,y-20); ctx.lineTo(cr-9*dir,y-27); ctx.lineTo(cr-9*dir,y-13); ctx.closePath(); ctx.fill();
-  function dot(x,c,lbl){ ctx.fillStyle=c; ctx.beginPath(); ctx.arc(x,y-20,7,0,7); ctx.fill(); ctx.fillStyle='#2b2d42'; ctx.font='bold 14px Baloo 2'; ctx.fillText(lbl,x,y-44); }
-  dot(ca,'#4d96ff',a); dot(cr,'#7c5cff',result);
+  maxN=Math.max(maxN,10);
+  const x0=46, x1=W-24, U=x1-x0;
+  const unit=U/maxN, bh=48, yc=70;
+  const cA=['#9bbeff','#4d96ff'], cB=['#9be7c9','#18c2b8'], cR=['#ffb3c1','#ff6b6b'];
+  function bar(x,w,c1,c2,label){
+    if(w<=0) return;
+    const r=Math.min(9,w/2);
+    const g=ctx.createLinearGradient(x,yc-bh/2,x,yc+bh/2);
+    g.addColorStop(0,c1); g.addColorStop(1,c2);
+    ctx.fillStyle=g; ctx.beginPath(); ctx.moveTo(x+r,yc-bh/2);
+    ctx.arcTo(x+w,yc-bh/2,x+w,yc+bh/2,r); ctx.arcTo(x+w,yc+bh/2,x,yc+bh/2,r);
+    ctx.arcTo(x,yc+bh/2,x,yc-bh/2,r); ctx.arcTo(x,yc-bh/2,x+w,yc-bh/2,r);
+    ctx.closePath(); ctx.fill();
+    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 17px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x+w/2,yc); }
+  }
+  function bracket(x,w,label){
+    if(w<=0) return;
+    ctx.strokeStyle='#7c5cff'; ctx.lineWidth=2;
+    const yb=yc+bh/2+12;
+    ctx.beginPath(); ctx.moveTo(x,yb); ctx.lineTo(x,yb+7); ctx.lineTo(x+w,yb+7); ctx.lineTo(x+w,yb); ctx.stroke();
+    ctx.fillStyle='#7c5cff'; ctx.font='bold 16px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(label,x+w/2,yb+10);
+  }
+  if(op==='+'){
+    const gap=(anim==null?0:anim), wA=a*unit, wB=b*unit;
+    bar(x0, wA, cA[0],cA[1], a);
+    bar(x0+wA+gap, wB, cB[0],cB[1], b);
+    if(gap<0.5) bracket(x0, wA+wB, '= '+(a+b));
+    ctx.fillStyle='#2b2d42'; ctx.font='bold 16px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillText(a+' + '+b+' = '+(a+b), W-20, 12);
+  } else {
+    const taken=Math.min(b,a), off=(anim==null?0:anim), wA=a*unit, wT=taken*unit;
+    bar(x0, wA-wT, cA[0],cA[1], a-taken);
+    bar(x0+wA-wT+off, wT, cR[0],cR[1], taken);
+    if(off<0.5) bracket(x0, wA-wT, '= '+(a-taken));
+    ctx.fillStyle='#2b2d42'; ctx.font='bold 16px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillText(a+' − '+b+' = '+(a-taken), W-20, 12);
+  }
 }
 function updateAdd(){
   let a=+$('addA').value||0, b=+$('addB').value||0, op=$('addOp').value;
@@ -739,46 +760,26 @@ function updateAdd(){
     $('addFormula').innerHTML = `${a} <b>−</b> ${b} <b>=</b> ${result}`;
     $('addExplain').innerHTML = `从 <b>${a}</b> 个里拿走 <b>${taken}</b> 个，还剩 <b>${result}</b> 个。减法就是“越拿越少”。`;
   }
-  drawLine($('addLine'), a, result, op, Math.max(a+b, a, 12));
+  drawBar($('addBar'), a, b, op, Math.max(a+b, a, b, 10), 0);
   earn('add');
 }
 
-/* 3D 数轴：小兔子跳跃 */
-let hopRAF=null;
-function animateHop(){
+/* 积木条：合起来 / 拿走 */
+let barRAF=null;
+function animateCombine(){
   const a=+$('addA').value||0, b=+$('addB').value||0, op=$('addOp').value;
-  const result = op==='-' ? Math.max(0,a-b) : a+b;
-  const canvas=$('addLine'); const ctx=canvas.getContext('2d');
-  const W=canvas.width,H=canvas.height, pad=34, y=H/2, x0=pad, x1=W-pad;
-  const maxN=Math.max(a+b,a,result,12);
-  const sx=v=>x0+(x1-x0)*(v/maxN);
-  function base(){
-    ctx.clearRect(0,0,W,H);
-    ctx.strokeStyle='#c9d2e8'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
-    ctx.fillStyle='#8893b0'; ctx.font='12px Baloo 2, sans-serif'; ctx.textAlign='center';
-    for(let i=0;i<=maxN;i++){ const x=sx(i); ctx.beginPath(); ctx.moveTo(x,y-8); ctx.lineTo(x,y+8); ctx.stroke(); ctx.fillText(i,x,y+26); }
-  }
-  cancelAnimationFrame(hopRAF);
-  const dur=1100; let t0=null;
+  const maxN=Math.max(a+b,a,b,10);
+  const canvas=$('addBar'); const dur=900; let t0=null;
+  cancelAnimationFrame(barRAF);
   function frame(t){
     if(t0===null) t0=t;
-    const p=Math.min(1,(t-t0)/dur);
-    const e=1-Math.pow(1-p,3);
-    const val=e*result; const x=sx(val);
-    const hops=Math.max(2,result);
-    const hop=Math.abs(Math.sin(p*Math.PI* hops))*20;
-    base();
-    ctx.font='30px serif'; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
-    ctx.fillText('🐰', x, y-24-hop);
-    ctx.fillStyle='#7c5cff'; ctx.beginPath(); ctx.arc(x,y,6,0,7); ctx.fill();
-    if(p<1){ hopRAF=requestAnimationFrame(frame); }
-    else {
-      base(); ctx.fillText('🐰', sx(result), y-24);
-      ctx.fillStyle='#7c5cff'; ctx.beginPath(); ctx.arc(sx(result),y,7,0,7); ctx.fill();
-      ctx.fillStyle='#2b2d42'; ctx.font='bold 15px Baloo 2'; ctx.fillText('落点 '+result, sx(result), y-48);
-    }
+    const p=Math.min(1,(t-t0)/dur); const e=1-Math.pow(1-p,3);
+    if(op==='+') drawBar(canvas,a,b,op,maxN, 70*(1-e));
+    else drawBar(canvas,a,b,op,maxN, 70*e);
+    if(p<1) barRAF=requestAnimationFrame(frame);
+    else drawBar(canvas,a,b,op,maxN,0);
   }
-  hopRAF=requestAnimationFrame(frame);
+  barRAF=requestAnimationFrame(frame);
 }
 
 /* ---------- 乘除法 ---------- */
