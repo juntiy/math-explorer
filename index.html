@@ -127,6 +127,49 @@
   .pyr-svg{ animation:spinSoft 16s linear infinite; transform-style:preserve-3d; }
   .geo-info{ text-align:center; font-size:15px; color:var(--ink-soft); }
   .geo-info b{ color:var(--purple); font-family:'Baloo 2'; }
+/* ---------- 几何计算工坊 ---------- */
+  .geo-panel{ display:none; }
+  .geo-panel.on{ display:block; animation:fadeIn .3s ease; }
+  .geo2d-wrap{ display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; margin:8px 0; }
+  .geo2d-svg{ flex:1 1 360px; min-width:300px; background:#fbfbff; border:2px dashed var(--line); border-radius:16px; padding:6px; }
+  .geo2d-side{ flex:0 0 230px; display:flex; flex-direction:column; gap:12px; }
+  .controls.col{ flex-direction:column; align-items:stretch; gap:10px; }
+  .geo2d-stage{ min-height:8px; margin-top:4px; }
+  .geo3d-wrap{ display:flex; gap:20px; align-items:center; flex-wrap:wrap; margin:10px 0; }
+  .geo3d-side{ flex:0 0 260px; }
+  /* SVG 标注 */
+  .glabel{ font:700 15px 'Baloo 2',sans-serif; fill:#5b4bdb; }
+  .glabel.w{ fill:#fff; }
+  .glabel.b{ fill:#1b8fc4; }
+  .gdim-line{ stroke:#ff6ba6; stroke-width:2; stroke-dasharray:5 3; }
+  .gdim-rect{ fill:rgba(124,92,255,.13); stroke:#7c5cff; stroke-width:2.5; }
+  .garea{ fill:rgba(255,159,67,.22); stroke:#ff9f43; stroke-width:2; }
+  .gfill{ fill:rgba(24,194,184,.18); stroke:#18c2b8; stroke-width:3; stroke-linejoin:round; }
+  .gfill.p{ fill:rgba(255,111,166,.20); stroke:#ff6ba6; }
+  .gfill.o{ fill:rgba(255,210,63,.30); stroke:#ffd23f; }
+  .gsq{ fill:rgba(124,92,255,.18); stroke:#7c5cff; stroke-width:3; }
+  .gsq.o{ fill:rgba(255,159,67,.30); stroke:#ff9f43; }
+  .gsq.g{ fill:rgba(24,194,184,.22); stroke:#18c2b8; }
+  .proof-note{ background:#fff7e6; border:2px dashed #ffcf6b; border-radius:12px; padding:8px 12px; font-size:14px; color:#8a5a00; margin-top:6px; }
+  .proof-note b{ color:#d4760a; }
+  /* 长方体 3D */
+  .cuboid{ position:relative; transform-style:preserve-3d; }
+  .cuboid .f{ position:absolute; border:2px solid rgba(255,255,255,.92); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#fff; background:rgba(124,92,255,.5); }
+  .cuboid .fb{ width:var(--w); height:var(--h); transform:translateZ(calc(var(--d)/2)); }
+  .cuboid .bf{ width:var(--w); height:var(--h); transform:rotateY(180deg) translateZ(calc(var(--d)/2)); }
+  .cuboid .lf{ width:var(--d); height:var(--h); transform:rotateY(-90deg) translateZ(calc(var(--w)/2)); }
+  .cuboid .rf{ width:var(--d); height:var(--h); transform:rotateY(90deg) translateZ(calc(var(--w)/2)); }
+  .cuboid .tf{ width:var(--w); height:var(--d); transform:rotateX(90deg) translateZ(calc(var(--h)/2)); }
+  .cuboid .df{ width:var(--w); height:var(--d); transform:rotateX(-90deg) translateZ(calc(var(--h)/2)); }
+  .cuboid .fb{ background:rgba(255,111,166,.5); }
+  .cuboid .lf,.cuboid .rf{ background:rgba(24,194,184,.5); }
+  .cuboid .tf,.cuboid .df{ background:rgba(255,210,63,.5); }
+  .solid-tag{ display:inline-block; background:#eef0ff; border-radius:10px; padding:3px 10px; margin:3px; font-size:13px; font-family:'Baloo 2'; color:#5b4bdb; }
+  .solid-tag b{ color:#ff6ba6; }
+  .scaleWrap{ transition:transform .35s ease; }
+  .shape-btn{ border:2px solid var(--line); background:#fff; border-radius:12px; padding:7px 12px; cursor:pointer; font-family:inherit; font-size:14px; transition:.15s; }
+  .shape-btn:hover{ border-color:var(--purple); }
+  .shape-btn.on{ background:var(--purple); color:#fff; border-color:var(--purple); }
   /* origin scene */
   .origin-scene{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center; min-height:60px; }
   .sheep{ font-size:34px; animation:pop .35s backwards; }
@@ -712,51 +755,71 @@
     <!-- 几何图形 -->
     <section class="screen" id="ch-geo">
       <div class="card">
-        <span class="badge">几何图形</span>
-        <h2>📐 平面图形 & 会转的立体图形</h2>
-        <p class="lead">先看平面图形（几条边的“多边形”），再看看真正的立体图形——它们有“面、棱、顶点”，转起来是不是很酷？数学能帮我们描述它们的形状和大小。</p>
-        <h3 style="font-size:17px;margin:6px 0">① 平面图形（点按钮看它有几条边、几个角）</h3>
-        <div class="shape-btns" id="polyBtns"></div>
-        <div style="text-align:center"><svg id="polySvg" width="240" height="200" viewBox="0 0 240 200"></svg></div>
-        <div class="geo-info" id="polyInfo"></div>
-        <hr style="border:none;border-top:1px dashed var(--line);margin:20px 0">
-        <h3 style="font-size:17px;margin:6px 0">② 立体图形（自动旋转，感受三维空间）</h3>
-        <div class="shape-btns" id="solidBtns"></div>
-        <div class="geo-stage" id="geoStage"></div>
-        <div class="geo-info" id="solidInfo"></div>
-      </div>
+        <span class="badge">几何计算工坊</span>
+        <h2>📐 图形怎么算大小？周长、面积、体积全看到！</h2>
+        <p class="lead">数学不只是认图形，更要会算它有多大。下面四个小工具，拖一拖滑块，图形会实时变，公式和答案也跟着跳出来——还能看每个公式是怎么“推”出来的。</p>
+        <div class="seg" id="geoSeg">
+          <button class="seg-btn on" data-t="plane" onclick="setGeoTap('plane')">2️⃣ 平面图形</button>
+          <button class="seg-btn" data-t="py" onclick="setGeoTap('py')">📐 勾股定理</button>
+          <button class="seg-btn" data-t="pi" onclick="setGeoTap('pi')">⭕ 圆周率 π</button>
+          <button class="seg-btn" data-t="solid" onclick="setGeoTap('solid')">🧊 立体图形</button>
+        </div>
 
-      <div class="card">
-        <h3 style="font-size:17px;margin:6px 0">③ 平行四边形 → 长方形：剪一剪、拼一拼</h3>
-        <p class="lead">所有平行四边形的面积都等于“底 × 高”。秘密在于：切下左边多出的三角形，拼到右边，就变成一个规规矩矩的长方形！点按钮看看。</p>
-        <div class="geo-svg-box">
-          <svg id="paraSvg" width="340" height="220" viewBox="0 0 320 220">
-            <polygon points="100,70 260,70 200,170 100,170" fill="rgba(24,194,184,.18)" stroke="#18c2b8" stroke-width="3" stroke-linejoin="round"/>
-            <polygon class="para-tri" id="paraTri" points="40,170 100,170 100,70" fill="rgba(124,92,255,.32)" stroke="#7c5cff" stroke-width="3" stroke-linejoin="round"/>
-            <rect class="para-rect" id="paraRect" x="100" y="70" width="160" height="100" fill="none" stroke="#ff6ba6" stroke-width="3" stroke-dasharray="6 4" rx="4"/>
-          </svg>
-        </div>
-        <div class="controls" style="justify-content:center">
-          <button class="play-btn" onclick="playPara()">✂️ 剪一剪，拼成长方形</button>
-        </div>
-        <div class="explain">平行四边形面积 = <b>底 × 高</b>（和拼出来的长方形一样大）。这就是“等积变换”——形状变了，面积不变。</div>
-      </div>
-
-      <div class="card">
-        <h3 style="font-size:17px;margin:6px 0">④ 圆面积：极限展开成近似长方形</h3>
-        <p class="lead">把圆像切披萨一样切成很多份，交错拼起来，会越来越像长方形。份数越多越像——这个长方形的长 ≈ <b>π r</b>、宽 = <b>r</b>，所以 <b>S = π r²</b>。</p>
-        <div class="geo-svg-box">
-          <svg id="circleSvg" width="340" height="220" viewBox="0 0 320 220"></svg>
-        </div>
-        <div class="controls" style="justify-content:center">
-          <div class="ctrl">切成几份
-            <select class="field num" id="circleN" onchange="updateCircleN()">
-              <option value="8">8 份</option><option value="16" selected>16 份</option><option value="32">32 份</option>
-            </select>
+        <!-- ① 平面图形 -->
+        <div class="geo-panel on" id="geo-plane">
+          <p class="lead" style="margin:4px 0 10px">选一种图形，拖动尺寸滑块，看它的<b>周长</b>和<b>面积</b>怎么算出来。点「🧩 看推导」还能看懂公式为什么成立。</p>
+          <div class="shape-btns" id="geo2dBtns"></div>
+          <div class="geo2d-wrap">
+            <div class="geo2d-svg"><svg id="geo2dSvg" viewBox="0 0 380 280" width="100%" height="280"></svg></div>
+            <div class="geo2d-side">
+              <div class="controls col" id="geo2dInputs"></div>
+              <button class="play-btn tgl" id="geo2dProofBtn" onclick="toggleGeo2dProof()">🧩 看推导</button>
+            </div>
           </div>
-          <button class="play-btn" onclick="playCircle()">▶ 把圆展开成方形</button>
+          <div class="formula num" id="geo2dFormula"></div>
+          <div class="explain" id="geo2dExplain"></div>
+          <div class="geo2d-stage" id="geo2dStage"></div>
         </div>
-        <div class="formula num" id="circleFb"></div>
+
+        <!-- ② 勾股定理 -->
+        <div class="geo-panel" id="geo-py">
+          <p class="lead" style="margin:4px 0 10px">直角三角形两直角边是 a、b，斜边是 c。<b>两个小正方形的面积加起来，正好等于大正方形的面积</b>——这就是著名的 a² + b² = c²！拖动边长看看。</p>
+          <div class="controls" style="justify-content:center">
+            <label class="ctrl">直角边 a <span id="pyAV" class="num">3</span><input type="range" id="pyA" min="1" max="12" value="3" oninput="onPy()"></label>
+            <label class="ctrl">直角边 b <span id="pyBV" class="num">4</span><input type="range" id="pyB" min="1" max="12" value="4" oninput="onPy()"></label>
+            <button class="play-btn" onclick="pyPlay()">✨ 看 a²+b² 拼成 c²</button>
+          </div>
+          <div class="geo2d-svg"><svg id="pySvg" viewBox="0 0 380 300" width="100%" height="300"></svg></div>
+          <div class="formula num" id="pyFormula"></div>
+          <div class="explain" id="pyExplain"></div>
+        </div>
+
+        <!-- ③ 圆周率 -->
+        <div class="geo-panel" id="geo-pi">
+          <p class="lead" style="margin:4px 0 10px">圆的周长和直径的比值，是个永远不变的数——<b>π（派）≈ 3.14159</b>。让圆在直线上滚一圈，量量它走了多远，就明白 π 是怎么来的。</p>
+          <div class="controls" style="justify-content:center">
+            <label class="ctrl">半径 r <span id="piRV" class="num">50</span><input type="range" id="piR" min="20" max="80" value="50" oninput="drawPi()"></label>
+            <button class="play-btn" onclick="piRoll()">▶ 让圆滚一圈</button>
+            <button class="play-btn alt" onclick="piUnroll()">🍕 把圆展开</button>
+          </div>
+          <div class="geo2d-svg"><svg id="piSvg" viewBox="0 0 460 260" width="100%" height="260"></svg></div>
+          <div class="formula num" id="piFormula"></div>
+          <div class="explain" id="piExplain"></div>
+        </div>
+
+        <!-- ④ 立体图形 -->
+        <div class="geo-panel" id="geo-solid">
+          <p class="lead" style="margin:4px 0 10px">立体图形有<b>体积</b>（占多大空间）和<b>表面积</b>（表面有多大）。选一种，拖动尺寸，它会转起来，体积和表面积实时算给你看。</p>
+          <div class="shape-btns" id="geo3dBtns"></div>
+          <div class="geo3d-wrap">
+            <div class="geo-stage" id="geo3dStage"></div>
+            <div class="geo3d-side">
+              <div class="controls col" id="geo3dInputs"></div>
+            </div>
+          </div>
+          <div class="formula num" id="geo3dFormula"></div>
+          <div class="explain" id="geo3dExplain"></div>
+        </div>
       </div>
     </section>
 
@@ -889,7 +952,7 @@ function show(id){
   if(id==='ch-square') updateSquare();
   if(id==='ch-sqrt') updateSqrt();
   if(id==='ch-area') updateArea();
-  if(id==='ch-geo'){ buildPolyBtns(); buildSolidBtns(); selectPoly('square'); selectSolid('cube'); buildCircle(+$('circleN').value); }
+  if(id==='ch-geo') geoInit();
   if(id==='ch-pattern'){ buildMTable(); fracReset(); gaussRender(); }
   if(id==='ch-multable') renderMultable();
 }
@@ -1461,121 +1524,260 @@ function updateArea(){
 }
 
 /* ---------- 几何：平面图形 ---------- */
-const POLYS = {
-  triangle:{name:'三角形', sides:3, verts:3, pts:[[120,30],[30,170],[210,170]]},
-  square:{name:'正方形', sides:4, verts:4, pts:[[50,40],[190,40],[190,160],[50,160]]},
-  rectangle:{name:'长方形', sides:4, verts:4, pts:[[30,55],[210,55],[210,165],[30,165]]},
-  pentagon:{name:'五边形', sides:5, verts:5, pts:[[120,25],[200,80],[170,170],[70,170],[40,80]]},
-  hexagon:{name:'六边形', sides:6, verts:6, pts:[[120,20],[200,60],[200,140],[120,180],[40,140],[40,60]]},
-  circle:{name:'圆形', sides:0, verts:0, circle:true}
-};
-function buildPolyBtns(){
-  const box=$('polyBtns'); if(box.dataset.built) return; box.dataset.built='1';
-  Object.keys(POLYS).forEach(k=>{ const b=document.createElement('button'); b.textContent=POLYS[k].name; b.dataset.k=k; b.onclick=()=>selectPoly(k); box.appendChild(b); });
-}
-function selectPoly(k){
-  const p=POLYS[k];
-  document.querySelectorAll('#polyBtns button').forEach(b=> b.classList.toggle('on', b.dataset.k===k));
-  const svg=$('polySvg'); svg.innerHTML='';
-  const ns='http://www.w3.org/2000/svg';
-  const mk=(tag,attrs)=>{ const e=document.createElementNS(ns,tag); for(const a in attrs) e.setAttribute(a,attrs[a]); return e; };
-  if(p.circle){
-    const c=mk('circle',{cx:120,cy:100,r:78,fill:'rgba(124,92,255,.15)',stroke:'#7c5cff','stroke-width':5});
-    svg.appendChild(c);
-    $('polyInfo').innerHTML = `圆形：没有直的边、没有角，是由一条曲线围起来的。它没有“边/顶点”的概念，但有无数条从中心到边一样长的半径。`;
-  } else {
-    let d='M'+p.pts.map(pt=>pt.join(',')).join(' L')+' Z';
-    const path=mk('path',{d,fill:'rgba(24,194,184,.16)',stroke:'#18c2b8','stroke-width':5,'stroke-linejoin':'round'});
-    svg.appendChild(path);
-    // vertices
-    p.pts.forEach(pt=>{ svg.appendChild(mk('circle',{cx:pt[0],cy:pt[1],r:5,fill:'#ff6ba6'})); });
-    $('polyInfo').innerHTML = `<b>${p.name}</b>：有 <b>${p.sides}</b> 条边、<b>${p.verts}</b> 个顶点（角）。边数越多，越接近圆。`;
-  }
-  earn('geo');
+/* ===================== 几何计算工坊 ===================== */
+let geoTap='plane';
+function setGeoTap(t){
+  geoTap=t;
+  document.querySelectorAll('#geoSeg .seg-btn').forEach(b=> b.classList.toggle('on', b.dataset.t===t));
+  document.querySelectorAll('.geo-panel').forEach(p=> p.classList.remove('on'));
+  const map={plane:'geo-plane',py:'geo-py',pi:'geo-pi',solid:'geo-solid'};
+  document.getElementById(map[t]).classList.add('on');
+  if(t==='pi') drawPi();
 }
 
-/* ---------- 几何：立体图形（3D） ---------- */
-const SOLIDS = {
-  cube:{name:'正方体', info:'6 个面（都是正方形）、12 条棱、8 个顶点。每个面一样大，最“规矩”的立体。'},
-  ball:{name:'球体', info:'从一个点（球心）到表面距离都相等的立体，像一个圆鼓鼓的球，没有棱和角。'},
-  cylinder:{name:'圆柱', info:'上下两个一样大的圆面 + 一个弯弯的侧面。像易拉罐、柱子。'},
-  cone:{name:'圆锥', info:'一个圆面当底 + 一个尖尖的顶点，侧面从底收拢到尖。像冰淇淋蛋筒。'},
-  pyramid:{name:'金字塔（四棱锥）', info:'一个正方形底面 + 4 个三角形侧面收到一个尖顶。埃及金字塔就是它！'}
+/* ---------- ① 平面图形 ---------- */
+let geo2dType='square';
+let geo2dProof=false;
+const SC=16; // 像素/单位
+const GEO2D={
+  square:{ name:'正方形', inputs:[{k:'a',label:'边长 a',min:1,max:12,def:5}],
+    calc:d=>({ formula:`周长 = 4 × a = <b>4 × ${d.a} = ${4*d.a}</b>　|　面积 = a × a = a² = <b>${d.a*d.a}</b>`,
+      explain:`正方形四条边一样长，面积就是边长 × 边长（a²）。` }),
+    svg:(d)=>{ const P=d.a*SC, x=190-P/2, y=150-P/2;
+      return `<rect class="gfill" x="${x}" y="${y}" width="${P}" height="${P}" rx="5"/>`+
+        `<text class="glabel" x="190" y="${y-8}" text-anchor="middle">a=${d.a}</text>`+
+        `<text class="glabel" x="${x+P+10}" y="${y+P/2+5}">a=${d.a}</text>`; } },
+  rectangle:{ name:'长方形', inputs:[{k:'a',label:'长 a',min:1,max:12,def:6},{k:'b',label:'宽 b',min:1,max:12,def:4}],
+    calc:d=>({ formula:`周长 = 2 × (a + b) = <b>2 × (${d.a}+${d.b}) = ${2*(d.a+d.b)}</b>　|　面积 = a × b = <b>${d.a*d.b}</b>`,
+      explain:`长方形面积 = 长 × 宽，就像铺了 a 行、每行 b 个小方块。` }),
+    svg:(d)=>{ const Pw=d.a*SC, Ph=d.b*SC, x=190-Pw/2, y=150-Ph/2;
+      return `<rect class="gfill" x="${x}" y="${y}" width="${Pw}" height="${Ph}" rx="5"/>`+
+        `<text class="glabel" x="190" y="${y+Ph+20}" text-anchor="middle">长 a=${d.a}</text>`+
+        `<text class="glabel" x="${x+Pw+10}" y="${y+Ph/2+5}">宽 b=${d.b}</text>`; } },
+  eqtri:{ name:'正三角形', inputs:[{k:'a',label:'边长 a',min:1,max:12,def:6}],
+    calc:d=>({ formula:`周长 = 3 × a = <b>${3*d.a}</b>　|　面积 = (√3 / 4) × a² ≈ <b>${((Math.sqrt(3)/4)*d.a*d.a).toFixed(1)}</b>`,
+      explain:`正三角形三条边一样长，高 h = (√3 / 2) × a，面积 = ½ × 底 × 高。` }),
+    svg:(d)=>{ const P=d.a*SC, H=P*Math.sqrt(3)/2, top=160-H;
+      return `<polygon class="gfill" points="190,${top} ${190-P/2},160 ${190+P/2},160"/>`+
+        `<line class="gdim-line" x1="190" y1="${top}" x2="190" y2="160"/>`+
+        `<text class="glabel" x="190" y="178" text-anchor="middle">a=${d.a}</text>`+
+        `<text class="glabel b" x="200" y="${(top+160)/2}" >h≈${(H/SC).toFixed(1)}</text>`; } },
+  triangle:{ name:'三角形', inputs:[{k:'b',label:'底 b',min:1,max:12,def:6},{k:'h',label:'高 h',min:1,max:12,def:5}],
+    calc:d=>({ formula:`面积 = 底 × 高 ÷ 2 = <b>${d.b} × ${d.h} ÷ 2 = ${(d.b*d.h/2).toFixed(1)}</b>`,
+      explain:`三角形的面积 = 底 × 高 ÷ 2。为什么 ÷2？因为它刚好是“半个平行四边形”。` }),
+    svg:(d)=>{ const Pb=d.b*SC, Ph=d.h*SC, bl=190-Pb/2, br=190+Pb/2, top=160-Ph;
+      return `<polygon class="gfill" points="190,${top} ${bl},160 ${br},160"/>`+
+        `<line class="gdim-line" x1="190" y1="${top}" x2="190" y2="160"/>`+
+        `<text class="glabel" x="190" y="178" text-anchor="middle">底 b=${d.b}</text>`+
+        `<text class="glabel b" x="200" y="${(top+160)/2}">高 h=${d.h}</text>`; },
+    proof:(d)=>{ const Pb=d.b*SC, Ph=d.h*SC, bl=190-Pb/2, br=190+Pb/2, top=160-Ph;
+      let s=`<div class="proof-note">复制一份、倒过来拼在右边，就变成一个<b>平行四边形</b>：面积 = 底 × 高 = ${d.b} × ${d.h} = ${d.b*d.h}。原三角形只是它的一半，所以要 <b>÷ 2</b> → ${(d.b*d.h/2).toFixed(1)}。</div>`;
+      s+=`<svg viewBox="0 0 380 120" width="100%" height="120">`;
+      s+=`<polygon class="gfill" points="40,20 40,100 ${40+Pb},100"/><polygon class="gfill p" points="${40+Pb},100 ${40+Pb+Pb},100 ${40+Pb},20"/>`;
+      s+=`<rect class="gdim-rect" x="40" y="20" width="${Pb*2}" height="${Ph}"/><text class="glabel" x="${40+Pb}" y="14" text-anchor="middle">平行四边形 = 底×高</text></svg>`;
+      return s; } },
+  trapezoid:{ name:'梯形', inputs:[{k:'u',label:'上底 u',min:1,max:12,def:4},{k:'l',label:'下底 l',min:1,max:12,def:8},{k:'h',label:'高 h',min:1,max:12,def:5}],
+    calc:d=>({ formula:`面积 = (上底 + 下底) × 高 ÷ 2 = <b>(${d.u}+${d.l}) × ${d.h} ÷ 2 = ${((d.u+d.l)*d.h/2).toFixed(1)}</b>`,
+      explain:`梯形面积 =（上底 + 下底）× 高 ÷ 2。秘密：两个一样的梯形能拼成一个平行四边形。` }),
+    svg:(d)=>{ const Pu=d.u*SC, Pl=d.l*SC, Ph=d.h*SC, ty=160-Ph;
+      const ul=190-Pu/2, ur=190+Pu/2, ll=190-Pl/2, lr=190+Pl/2;
+      return `<polygon class="gfill" points="${ul},${ty} ${ur},${ty} ${lr},160 ${ll},160"/>`+
+        `<line class="gdim-line" x1="190" y1="${ty}" x2="190" y2="160"/>`+
+        `<text class="glabel" x="190" y="${ty-8}" text-anchor="middle">上底 u=${d.u}</text>`+
+        `<text class="glabel" x="190" y="178" text-anchor="middle">下底 l=${d.l}</text>`+
+        `<text class="glabel b" x="200" y="${(ty+160)/2}">高 h=${d.h}</text>`; },
+    proof:(d)=>{ const Pu=d.u*SC, Pl=d.l*SC, Ph=d.h*SC;
+      let s=`<div class="proof-note">拿两个一样的梯形，一个正放、一个倒放，拼起来是一个<b>平行四边形</b>：底 = 上底+下底 = ${d.u}+${d.l}=${d.u+d.l}，高 = h = ${d.h}，面积 = (${d.u+d.l}) × ${d.h} = ${(d.u+d.l)*d.h}。一个梯形只要一半 → <b>÷ 2</b>。</div>`;
+      s+=`<svg viewBox="0 0 380 120" width="100%" height="120">`;
+      const ul=60, ur=60+Pu, ll=60-(Pl-Pu)/2, lr=ll+Pl, ty=100-Ph;
+      s+=`<polygon class="gfill" points="${ul},${ty} ${ur},${ty} ${lr},100 ${ll},100"/><polygon class="gfill p" points="${lr},100 ${lr+Pl},100 ${ur+Pl},${ty} ${ur},${ty}"/>`;
+      s+=`<rect class="gdim-rect" x="${ll}" y="${ty}" width="${Pl*2-Pu}" height="${Ph}"/><text class="glabel" x="190" y="${ty-6}" text-anchor="middle">平行四边形=(上底+下底)×高</text></svg>`;
+      return s; } },
+  circle:{ name:'圆形', inputs:[{k:'r',label:'半径 r',min:1,max:12,def:5}],
+    calc:d=>({ formula:`周长 = 2 × π × r ≈ <b>2 × 3.14 × ${d.r} = ${(2*Math.PI*d.r).toFixed(1)}</b>　|　面积 = π × r² ≈ <b>3.14 × ${d.r*d.r} = ${(Math.PI*d.r*d.r).toFixed(1)}</b>`,
+      explain:`圆的周长是“2π r”，面积是“π r²”。想知道 π 怎么来的，点上面「⭕ 圆周率 π」标签页看圆的滚动实验。` }),
+    svg:(d)=>{ const R=d.r*11.5, cx=190, cy=140;
+      return `<circle class="gfill" cx="${cx}" cy="${cy}" r="${R}"/>`+
+        `<line class="gdim-line" x1="${cx}" y1="${cy}" x2="${cx+R}" y2="${cy}"/>`+
+        `<text class="glabel" x="${cx+R/2+4}" y="${cy-6}">r=${d.r}</text>`+
+        `<line x1="${cx-R}" y1="${cy+R+14}" x2="${cx+R}" y2="${cy+R+14}" stroke="#ff6ba6" stroke-width="2" stroke-dasharray="5 3"/>`+
+        `<text class="glabel" x="${cx}" y="${cy+R+30}" text-anchor="middle">直径 = 2r = ${2*d.r}</text>`; },
+    proof:(d)=>{ let s=`<div class="proof-note">把圆像切披萨一样切成很多小扇形，交错拼起来，会越来越像<b>长方形</b>：长 ≈ π r，宽 = r，所以 <b>面积 = π r × r = π r²</b>。点「⭕ 圆周率 π」里的「🍕 把圆展开」看动画！</div>`;
+      return s; } }
 };
-function buildSolidBtns(){
-  const box=$('solidBtns'); if(box.dataset.built) return; box.dataset.built='1';
-  Object.keys(SOLIDS).forEach(k=>{ const b=document.createElement('button'); b.textContent=SOLIDS[k].name; b.dataset.k=k; b.onclick=()=>selectSolid(k); box.appendChild(b); });
+function buildGeo2dBtns(){
+  const box=$('geo2dBtns'); if(box.dataset.b) return; box.dataset.b='1';
+  Object.keys(GEO2D).forEach(k=>{ const b=document.createElement('button'); b.textContent=GEO2D[k].name; b.dataset.t=k; b.className='shape-btn'; b.onclick=()=>setGeo2d(k); box.appendChild(b); });
 }
-function selectSolid(k){
-  const info=SOLIDS[k];
-  document.querySelectorAll('#solidBtns button').forEach(b=> b.classList.toggle('on', b.dataset.k===k));
-  const stage=$('geoStage'); stage.innerHTML='';
-  if(k==='cube'){
-    const wrap=document.createElement('div'); wrap.className='shape3d';
-    wrap.innerHTML=`<div class="cube"><div class="f f1">1</div><div class="f f2">2</div><div class="f f3">3</div><div class="f f4">4</div><div class="f f5">5</div><div class="f f6">6</div></div>`;
-    stage.appendChild(wrap);
-  } else if(k==='ball'){
-    const b=document.createElement('div'); b.className='ball'; stage.appendChild(b);
-  } else if(k==='cylinder'){
-    const c=document.createElement('div'); c.className='cyl'; c.innerHTML=`<div class="top"></div><div class="body"></div><div class="bot"></div>`; stage.appendChild(c);
-  } else if(k==='cone'){
-    const c=document.createElement('div'); c.className='cone'; c.innerHTML=`<div class="tip"></div><div class="cbase"></div>`; stage.appendChild(c);
-  } else if(k==='pyramid'){
-    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('width','220'); svg.setAttribute('height','200'); svg.setAttribute('viewBox','0 0 220 200'); svg.setAttribute('class','pyr-svg');
-    svg.innerHTML=`<polygon points="110,20 200,150 110,190 20,150" fill="rgba(255,111,166,.25)" stroke="#ff6ba6" stroke-width="4"/>
-      <polygon points="110,20 200,150 110,150" fill="rgba(255,159,67,.45)"/>
-      <polygon points="110,20 20,150 110,150" fill="rgba(124,92,255,.4)"/>
-      <polygon points="20,150 110,190 110,150" fill="rgba(24,194,184,.4)"/>
-      <polygon points="200,150 110,190 110,150" fill="rgba(77,150,255,.4)"/>
-      <polygon points="20,150 200,150 110,190" fill="rgba(255,210,63,.3)" stroke="#ffd23f" stroke-width="2"/>`;
-    stage.appendChild(svg);
-  }
-  $('solidInfo').innerHTML = `<b>${info.name}</b>：${info.info}`;
-  earn('geo');
+function setGeo2d(t){
+  buildGeo2dBtns();
+  geo2dType=t; geo2dProof=false;
+  document.querySelectorAll('#geo2dBtns button').forEach(b=> b.classList.toggle('on', b.dataset.t===t));
+  buildGeo2dInputs(); drawGeo2d();
+}
+function buildGeo2dInputs(){
+  const cfg=GEO2D[geo2dType], wrap=$('geo2dInputs'); wrap.innerHTML='';
+  cfg.inputs.forEach(inp=>{ wrap.innerHTML+=`<label class="ctrl">${inp.label} <span id="g2_${inp.k}" class="num">${inp.def}</span><input type="range" min="${inp.min}" max="${inp.max}" value="${inp.def}" oninput="onGeo2d('${inp.k}',this.value)"></label>`; });
+  const pb=$('geo2dProofBtn'); pb.style.display = cfg.proof? 'inline-block':'none'; pb.classList.remove('on');
+}
+function onGeo2d(k,v){ $('g2_'+k).textContent=v; if(geo2dProof) geo2dProof=false, $('geo2dProofBtn').classList.remove('on'); drawGeo2d(); }
+function toggleGeo2dProof(){ geo2dProof=!geo2dProof; $('geo2dProofBtn').classList.toggle('on',geo2dProof); drawGeo2d(); }
+function drawGeo2d(){
+  const cfg=GEO2D[geo2dType], d={}; cfg.inputs.forEach(inp=> d[inp.k]=+$('g2_'+inp.k).textContent);
+  const res=cfg.calc(d);
+  $('geo2dSvg').innerHTML=cfg.svg(d);
+  $('geo2dFormula').innerHTML=res.formula;
+  $('geo2dExplain').innerHTML=res.explain;
+  $('geo2dStage').innerHTML = (geo2dProof && cfg.proof)? cfg.proof(d) : '';
 }
 
-/* ---------- 几何：平行四边形剪拼 / 圆极限 ---------- */
-function playPara(){
-  $('paraTri').classList.toggle('move');
-  $('paraRect').classList.toggle('show');
+/* ---------- ② 勾股定理 ---------- */
+let pyA=3, pyB=4, pyPlaying=false;
+function onPy(){ pyA=+$('pyA').value; pyB=+$('pyB').value; $('pyAV').textContent=pyA; $('pyBV').textContent=pyB; drawPy(); }
+function drawPy(){
+  const a=pyA, b=pyB, c=Math.sqrt(a*a+b*b);
+  const A=a*13, B=b*13, C=c*13;
+  const O={x:70,y:250};
+  const A2={x:O.x,y:O.y-A}, B2={x:O.x+B,y:O.y};
+  const svg=$('pySvg');
+  let s=`<polygon class="gfill" points="${O.x},${O.y} ${A2.x},${A2.y} ${B2.x},${B2.y}"/>`;
+  s+=`<text class="glabel" x="${O.x-8}" y="${O.y-A/2}">a=${a}</text><text class="glabel" x="${O.x+B/2}" y="${O.y+16}">b=${b}</text>`;
+  s+=`<text class="glabel w" x="${(A2.x+B2.x)/2+6}" y="${(A2.y+B2.y)/2}">c=${c.toFixed(1)}</text>`;
+  // 正方形 a²（左侧）
+  s+=`<rect class="gsq" x="${O.x-A}" y="${O.y-A}" width="${A}" height="${A}"/>`;
+  s+=`<text class="glabel w" x="${O.x-A/2}" y="${O.y-A/2+5}" text-anchor="middle">a²=${a*a}</text>`;
+  // 正方形 b²（下方）
+  s+=`<rect class="gsq o" x="${O.x}" y="${O.y}" width="${B}" height="${B}"/>`;
+  s+=`<text class="glabel w" x="${O.x+B/2}" y="${O.y+B/2+5}" text-anchor="middle">b²=${b*b}</text>`;
+  // 正方形 c²（斜边外侧）
+  const nx=(A2.y-B2.y), ny=(B2.x-A2.x); const nl=Math.hypot(nx,ny); const ux=nx/nl, uy=ny/nl;
+  const P1=A2, P2=B2, P3={x:B2.x+ux*C,y:B2.y+uy*C}, P4={x:A2.x+ux*C,y:A2.y+uy*C};
+  s+=`<polygon class="gsq g" points="${P1.x},${P1.y} ${P2.x},${P2.y} ${P3.x},${P3.y} ${P4.x},${P4.y}"/>`;
+  s+=`<text class="glabel w" x="${(P1.x+P3.x)/2}" y="${(P1.y+P3.y)/2+5}" text-anchor="middle">c²≈${Math.round(a*a+b*b)}</text>`;
+  svg.innerHTML=s;
+  $('pyFormula').innerHTML=`a² + b² = ${a*a} + ${b*b} = <b>${a*a+b*b}</b>　|　c = √(a²+b²) = <b>√${a*a+b*b} = ${c.toFixed(2)}</b>`;
+  $('pyExplain').innerHTML=`两个小正方形面积加起来（${a*a} + ${b*b} = ${a*a+b*b}），<b>正好等于</b>斜边外侧大正方形的面积（c² ≈ ${Math.round(a*a+b*b)}）。这就是勾股定理！`;
 }
-let circleExpanded=false;
-function buildCircle(N){
-  const svg=$('circleSvg'); if(!svg) return;
+function pyPlay(){
+  if(pyPlaying) return; pyPlaying=true;
+  const svg=$('pySvg');
+  svg.querySelectorAll('.gsq,.gsq.o,.gsq.g').forEach(e=>{ e.style.transition='opacity .5s'; e.style.opacity='0.25'; });
+  setTimeout(()=>{ svg.querySelectorAll('.gsq').forEach(e=>e.style.opacity='1'); sfx('ok'); },400);
+  setTimeout(()=>{ svg.querySelectorAll('.gsq.o').forEach(e=>e.style.opacity='1'); sfx('fold'); },800);
+  setTimeout(()=>{ svg.querySelectorAll('.gsq.g').forEach(e=>e.style.opacity='1'); sfx('ok'); pyPlaying=false; },1200);
+}
+
+/* ---------- ③ 圆周率 π ---------- */
+let piUnrolled=false;
+function drawPi(){
+  const r=+$('piR').value; $('piRV').textContent=r;
+  const R=r*0.85, cx=R+18, cy=210-R, svg=$('piSvg');
+  let s=`<line x1="10" y1="210" x2="450" y2="210" stroke="#bbb" stroke-width="2"/>`;
+  s+=`<g id="piRollG" transform="translate(${cx},${cy})"><circle cx="0" cy="0" r="${R}" fill="rgba(255,159,67,.20)" stroke="#ff9f43" stroke-width="3"/><line x1="0" y1="0" x2="${R}" y2="0" stroke="#7c5cff" stroke-width="3"/><circle cx="0" cy="0" r="3" fill="#7c5cff"/></g>`;
+  s+=`<text class="glabel" x="${cx}" y="${cy+R+18}" text-anchor="middle">直径 = 2r = ${2*r}</text>`;
+  s+=`<text class="glabel b" x="${cx+R/2+4}" y="${cy-6}">r=${r}</text>`;
+  svg.innerHTML=s;
+  piUnrolled=false;
+  $('piFormula').innerHTML=`圆的秘密：<b>周长 ÷ 直径 = π ≈ 3.14159…</b>（永远不变！）`;
+  $('piExplain').innerHTML=`让圆在直线上滚一圈，量量它走了多远（周长），再除以直径，得到的就是 π。拖半径滑块换大小，比值始终不变。`;
+}
+function piRoll(){
+  const r=+$('piR').value; const R=r*0.85;
+  const g=$('piRollG'); if(!g) return; const cx0=R+18, y=210-R, dist=2*Math.PI*R;
+  const dur=1700, t0=performance.now(); let landed=false;
+  function frame(t){
+    const p=Math.min(1,(t-t0)/dur); const cx=cx0+dist*p; const ang=p*360;
+    g.setAttribute('transform',`translate(${cx},${y}) rotate(${ang})`);
+    if(p>=1 && !landed){ landed=true;
+      const svg=$('piSvg'); const landX=cx0+dist;
+      const mark=document.createElementNS('http://www.w3.org/2000/svg','line');
+      mark.setAttribute('x1',landX); mark.setAttribute('y1',y-R-14); mark.setAttribute('x2',landX); mark.setAttribute('y2',y+R+14);
+      mark.setAttribute('stroke','#ff6ba6'); mark.setAttribute('stroke-width','3');
+      svg.appendChild(mark);
+      const tx=document.createElementNS('http://www.w3.org/2000/svg','text');
+      tx.setAttribute('class','glabel'); tx.setAttribute('x',landX-6); tx.setAttribute('y',y-R-18); tx.setAttribute('text-anchor','middle');
+      tx.textContent=`周长≈${dist.toFixed(0)}`; svg.appendChild(tx);
+      $('piFormula').innerHTML=`周长 ≈ <b>${dist.toFixed(1)}</b>　|　直径 = 2r = <b>${2*r}</b>　|　π = 周长 ÷ 直径 ≈ <b>${(dist/(2*r)).toFixed(4)}</b>`;
+      $('piExplain').innerHTML=`圆滚一圈刚好走了一个<b>周长</b>，落点和起点之间距离就是周长。周长 ÷ 直径 = π，无论圆多大，结果都奔向 <b>3.14159…</b>`;
+      sfx('ok');
+    }
+    if(p<1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+function piUnroll(){
+  const svg=$('piSvg'); const r=+$('piR').value; const R=70, cx=120, cy=130, N=16;
   const ns='http://www.w3.org/2000/svg';
   svg.innerHTML='';
-  const r=70, cx=150, cy=110;
-  const circ=document.createElementNS(ns,'circle'); circ.setAttribute('cx',cx);circ.setAttribute('cy',cy);circ.setAttribute('r',r);circ.setAttribute('fill','rgba(255,159,67,.18)');circ.setAttribute('stroke','#ff9f43');circ.setAttribute('stroke-width','3'); svg.appendChild(circ);
-  const step=(2*Math.PI)/N;
-  const w=220/N;
+  svg.appendChild(mkline(10,210,450,210,'#bbb',2));
+  const circ=document.createElementNS(ns,'circle'); circ.setAttribute('cx',cx);circ.setAttribute('cy',cy);circ.setAttribute('r',R);
+  circ.setAttribute('fill','rgba(255,159,67,.18)');circ.setAttribute('stroke','#ff9f43');circ.setAttribute('stroke-width','3'); svg.appendChild(circ);
+  const step=(2*Math.PI)/N, w=200/N;
   for(let i=0;i<N;i++){
-    const a0=-Math.PI/2 + i*step, a1=a0+step;
-    const x0=cx+r*Math.cos(a0), y0=cy+r*Math.sin(a0);
-    const x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1);
+    const a0=-Math.PI/2+i*step, a1=a0+step;
+    const x0=cx+R*Math.cos(a0), y0=cy+R*Math.sin(a0), x1=cx+R*Math.cos(a1), y1=cy+R*Math.sin(a1);
     const p=document.createElementNS(ns,'path');
-    p.setAttribute('d',`M${cx},${cy} L${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 0 1 ${x1.toFixed(1)},${y1.toFixed(1)} Z`);
-    p.setAttribute('fill', i%2? 'rgba(255,210,63,.5)':'rgba(255,159,67,.5)');
-    p.setAttribute('stroke','#fff'); p.setAttribute('stroke-width','1.5');
-    p.setAttribute('class','sector');
-    const tx=(i-(N-1)/2)*w;
-    const ty=(i%2? r*0.5 : -r*0.5);
-    p.dataset.tx=tx; p.dataset.ty=ty;
-    p.style.transformBox='view-box';
+    p.setAttribute('d',`M${cx},${cy} L${x0.toFixed(1)},${y0.toFixed(1)} A${R},${R} 0 0 1 ${x1.toFixed(1)},${y1.toFixed(1)} Z`);
+    p.setAttribute('fill', i%2?'rgba(255,210,63,.5)':'rgba(255,159,67,.5)');
+    p.setAttribute('stroke','#fff'); p.setAttribute('stroke-width','1.5'); p.setAttribute('class','sector');
+    const tx=(i-(N-1)/2)*w; const ty=(i%2? R*0.5 : -R*0.5);
+    p.dataset.tx=tx; p.dataset.ty=ty; p.style.transformBox='view-box';
     svg.appendChild(p);
   }
+  piUnrolled=true;
+  $('piFormula').innerHTML=`圆切成 ${N} 份再交错拼起来 → 越来越像<b>长方形</b>：长 ≈ π r，宽 = r`;
+  $('piExplain').innerHTML=`扇形越切越细，拼出的图形越接近长方形。这个长方形的长 ≈ 圆周长的一半 = <b>π r</b>，宽 = <b>r</b>，所以 面积 = π r × r = <b>π r²</b>。`;
+  setTimeout(()=>{ svg.querySelectorAll('.sector').forEach(p=>{ p.style.transition='transform .6s'; p.style.transform=`translate(${p.dataset.tx}px,${p.dataset.ty}px)`; }); },300);
 }
-function updateCircleN(){ buildCircle(+$('circleN').value); circleExpanded=false; $('circleFb').innerHTML='拖动滑块看切的份数，点“展开”看它怎么变成长方形。'; }
-function playCircle(){
-  circleExpanded=!circleExpanded;
-  document.querySelectorAll('#circleSvg .sector').forEach(p=>{
-    p.style.transform = circleExpanded ? `translate(${p.dataset.tx}px,${p.dataset.ty}px)` : 'translate(0,0)';
-  });
-  $('circleFb').innerHTML = circleExpanded
-    ? `圆被切成 ${+$('circleN').value} 份再拼起来，越来越像长方形：长 ≈ <b>π r</b>，宽 = <b>r</b>，所以 <b>S = π r × r = π r²</b>`
-    : `切得越细（试试 32 份），拼出来的长方形就越标准。`;
-}
+function mkline(x1,y1,x2,y2,stroke,w){ const l=document.createElementNS('http://www.w3.org/2000/svg','line'); l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('stroke',stroke);l.setAttribute('stroke-width',w); return l; }
 
+/* ---------- ④ 立体图形 ---------- */
+const PYRAMID_SVG=`<polygon points="110,20 200,150 110,190 20,150" fill="rgba(255,111,166,.25)" stroke="#ff6ba6" stroke-width="4"/><polygon points="110,20 200,150 110,150" fill="rgba(255,159,67,.45)"/><polygon points="110,20 20,150 110,150" fill="rgba(124,92,255,.4)"/><polygon points="20,150 110,190 110,150" fill="rgba(24,194,184,.4)"/><polygon points="200,150 110,190 110,150" fill="rgba(77,150,255,.4)"/><polygon points="20,150 200,150 110,190" fill="rgba(255,210,63,.3)" stroke="#ffd23f" stroke-width="2"/>`;
+let geo3dType='cube';
+const GEO3D={
+  cube:{ name:'正方体', inputs:[{k:'a',label:'棱长 a',min:1,max:12,def:4}],
+    calc:d=>{const a=d.a; return { formula:`体积 V = a³ = <b>${a}³ = ${a*a*a}</b>　|　表面积 S = 6 a² = <b>6 × ${a*a} = ${6*a*a}</b>`, explain:`正方体 6 个面都是一样的正方形（a×a），所以表面积 = 6 个 a²；体积 = 长×宽×高 = a³。` };},
+    html:d=>{ const k=Math.min(0.55+d.a*0.06,1.1); return scaleWrap(k,`<div class="shape3d"><div class="cube">${['1','2','3','4','5','6'].map((n,i)=>`<div class="f f${i+1}">a</div>`).join('')}</div></div>`); } },
+  cuboid:{ name:'长方体', inputs:[{k:'a',label:'长 a',min:1,max:12,def:6},{k:'b',label:'宽 b',min:1,max:12,def:4},{k:'c',label:'高 c',min:1,max:12,def:5}],
+    calc:d=>{const{a,b,c}=d; return { formula:`体积 V = a×b×c = <b>${a*b*c}</b>　|　表面积 S = 2(ab+bc+ca) = <b>${2*(a*b+b*c+c*a)}</b>`, explain:`长方体体积 = 长×宽×高；表面积 = 前后、左右、上下六个面加起来。` };},
+    html:d=>{ const w=d.a*13,h=d.c*13,dd=d.b*13,k=Math.min(0.5+(d.a+d.b+d.c)/42,1.05); return scaleWrap(k,`<div class="shape3d"><div class="cuboid" style="--w:${w}px;--h:${h}px;--d:${dd}px">${['fb','bf','lf','rf','tf','df'].map(f=>`<div class="f ${f}"></div>`).join('')}</div></div>`); } },
+  cylinder:{ name:'圆柱', inputs:[{k:'r',label:'底面半径 r',min:1,max:12,def:4},{k:'h',label:'高 h',min:1,max:12,def:6}],
+    calc:d=>{const r=d.r,h=d.h,V=Math.PI*r*r*h,S=2*Math.PI*r*(h+r); return { formula:`体积 V = π r² h = π×${r*r}×${h} ≈ <b>${V.toFixed(1)}</b>　|　表面积 S = 2πr(h+r) ≈ <b>${S.toFixed(1)}</b>`, explain:`圆柱体积 = 底面积(πr²) × 高；侧面展开是个长方形（长=底面周长 2πr，宽=h）。` };},
+    html:d=>{ const k=Math.min(0.5+(d.r+d.h)/20,1.05); return scaleWrap(k,`<div class="shape3d"><div class="cyl"><div class="top"></div><div class="body"></div><div class="bot"></div></div></div>`); } },
+  cone:{ name:'圆锥', inputs:[{k:'r',label:'底面半径 r',min:1,max:12,def:4},{k:'h',label:'高 h',min:1,max:12,def:6}],
+    calc:d=>{const r=d.r,h=d.h,l=Math.sqrt(r*r+h*h),V=Math.PI*r*r*h/3,S=Math.PI*r*(r+l); return { formula:`体积 V = ⅓ π r² h = ⅓×π×${r*r}×${h} ≈ <b>${V.toFixed(1)}</b>　|　表面积 S = π r(r+l) ≈ <b>${S.toFixed(1)}</b>`, explain:`圆锥体积 = 同底等高圆柱体积的 ⅓；母线 l = √(r²+h²)。` };},
+    html:d=>{ const k=Math.min(0.5+(d.r+d.h)/20,1.05); return scaleWrap(k,`<div class="shape3d"><div class="cone"><div class="tip"></div><div class="cbase"></div></div></div>`); } },
+  ball:{ name:'球体', inputs:[{k:'r',label:'半径 r',min:1,max:12,def:5}],
+    calc:d=>{const r=d.r,V=4/3*Math.PI*r*r*r,S=4*Math.PI*r*r; return { formula:`体积 V = 4/3 π r³ = 4/3×π×${r*r*r} ≈ <b>${V.toFixed(1)}</b>　|　表面积 S = 4π r² ≈ <b>${S.toFixed(1)}</b>`, explain:`球体积 = 4/3 π r³，表面积 = 4π r²（像包住球的那层皮）。` };},
+    html:d=>{ const k=Math.min(0.5+d.r*0.06,1.1); return scaleWrap(k,`<div class="shape3d"><div class="ball"></div></div>`); } },
+  pyramid:{ name:'四棱锥', inputs:[{k:'a',label:'底边长 a',min:1,max:12,def:5},{k:'h',label:'高 h',min:1,max:12,def:6}],
+    calc:d=>{const a=d.a,h=d.h,V=a*a*h/3; return { formula:`体积 V = ⅓ × 底面积 × 高 = ⅓ × a² × h = ⅓×${a*a}×${h} = <b>${V.toFixed(1)}</b>`, explain:`棱锥体积 = ⅓ × 底面积 × 高（和圆锥一样，都是同底柱体的 ⅓）。` };},
+    html:d=>{ const k=Math.min(0.55+(d.a+d.h)/22,1.05); return scaleWrap(k,`<div class="shape3d"><svg class="pyr-svg" width="220" height="200" viewBox="0 0 220 200">${PYRAMID_SVG}</svg></div></div>`); } }
+};
+function scaleWrap(k,inner){ return `<div class="scaleWrap" style="transform:scale(${k})">${inner}</div>`; }
+function buildGeo3dBtns(){
+  const box=$('geo3dBtns'); if(box.dataset.b) return; box.dataset.b='1';
+  Object.keys(GEO3D).forEach(k=>{ const b=document.createElement('button'); b.textContent=GEO3D[k].name; b.dataset.t=k; b.className='shape-btn'; b.onclick=()=>setGeo3d(k); box.appendChild(b); });
+}
+function setGeo3d(t){
+  buildGeo3dBtns();
+  geo3dType=t;
+  document.querySelectorAll('#geo3dBtns button').forEach(b=> b.classList.toggle('on', b.dataset.t===t));
+  buildGeo3dInputs(); drawGeo3d();
+}
+function buildGeo3dInputs(){
+  const cfg=GEO3D[geo3dType], wrap=$('geo3dInputs'); wrap.innerHTML='';
+  cfg.inputs.forEach(inp=>{ wrap.innerHTML+=`<label class="ctrl">${inp.label} <span id="g3_${inp.k}" class="num">${inp.def}</span><input type="range" min="${inp.min}" max="${inp.max}" value="${inp.def}" oninput="onGeo3d('${inp.k}',this.value)"></label>`; });
+}
+function onGeo3d(k,v){ $('g3_'+k).textContent=v; drawGeo3d(); }
+function drawGeo3d(){
+  const cfg=GEO3D[geo3dType], d={}; cfg.inputs.forEach(inp=> d[inp.k]=+$('g3_'+inp.k).textContent);
+  const res=cfg.calc(d);
+  $('geo3dStage').innerHTML=cfg.html(d);
+  $('geo3dFormula').innerHTML=res.formula;
+  $('geo3dExplain').innerHTML=res.explain+`<div style="margin-top:6px">`+cfg.inputs.map(inp=>`<span class="solid-tag">${inp.label}=<b>${d[inp.k]}</b></span>`).join('')+`</div>`;
+}
+function geoInit(){ setGeo2d('square'); setGeo3d('cube'); drawPi(); }
 /* ---------- 发现规律 Patterns ---------- */
 let actx;
 function sfx(type){
