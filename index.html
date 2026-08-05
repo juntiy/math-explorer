@@ -302,6 +302,20 @@
   .m10-ten-line::after{ content:'↑ 凑成整十！'; position:absolute; right:0; top:-20px; font-family:'Baloo 2'; font-size:13px; font-weight:800; color:var(--purple); }
   .m10-split-note{ font-family:'Baloo 2'; font-size:15px; color:#e85d3b; font-weight:700; text-align:center; margin:4px 0; }
   .m10-simple{ text-align:center; font-family:'Baloo 2'; font-size:18px; color:var(--ink-soft); margin:8px 0; }
+
+  /* ---------- 动态数字系统 ---------- */
+  #arabicVal{ font-size:32px; color:var(--purple); }
+  #chineseVal{ font-size:28px; }
+  #romanVal{ font-size:26px; letter-spacing:2px; }
+  /* ---------- 乘法口诀表 ---------- */
+  .multable-wrap{ margin:14px 0; }
+  .multable{ display:grid; grid-template-columns:repeat(13,1fr); gap:2px; max-width:680px; margin:0 auto; font-family:"Baloo 2",sans-serif; }
+  .mt-header{ background:linear-gradient(135deg,#7c5cff,#4d96ff); color:#fff; font-size:13px; font-weight:800; padding:6px 2px; text-align:center; border-radius:4px; }
+  .mt-cell{ background:#fff; border:1px solid var(--line); border-radius:4px; padding:5px 2px; text-align:center; font-size:13px; font-weight:700; transition:.15s; cursor:default; }
+  .mt-cell:hover{ transform:scale(1.08); z-index:2; box-shadow:0 3px 10px rgba(80,90,160,.18); }
+  .mt-cell.diag{ background:linear-gradient(135deg,#fff3e0,#ffe9c7); border-color:#ffcf8f; }
+  .mt-sym{ color:var(--ink-soft); font-weight:400; }
+
 </style>
 </head>
 <body>
@@ -325,7 +339,8 @@
     <button class="nav-btn" data-target="ch-sqrt" onclick="show('ch-sqrt')"><span class="ico">√</span> 根号</button>
     <button class="nav-btn" data-target="ch-area" onclick="show('ch-area')"><span class="ico">▦</span> 面积</button>
     <button class="nav-btn" data-target="ch-geo" onclick="show('ch-geo')"><span class="ico">📐</span> 几何图形</button>
-    <button class="nav-btn" data-target="ch-pattern" onclick="show('ch-pattern')"><span class="ico">🔍</span> 发现规律</button>
+    <button class="nav-btn" data-target="ch-multable" onclick="show('ch-multable')"><span class="ico">✖️</span> 乘法口诀表</button>
+            <button class="nav-btn" data-target="ch-pattern" onclick="show('ch-pattern')"><span class="ico">🔍</span> 发现规律</button>
   </aside>
 
   <main class="main">
@@ -343,6 +358,7 @@
           <div class="chip" onclick="show('ch-sqrt')">√ 根号</div>
           <div class="chip" onclick="show('ch-area')">▦ 面积</div>
           <div class="chip" onclick="show('ch-geo')">📐 几何图形</div>
+          <div class="chip" onclick="show('ch-multable')">✖️ 乘法口诀表</div>
           <div class="chip" onclick="show('ch-pattern')">🔍 发现规律</div>
         </div>
       </div>
@@ -358,9 +374,10 @@
           <span class="jarrow">→</span>
           <div class="jstage"><span>④</span><b>几何·面积</b><span>剪拼转化</span></div>
           <span class="jarrow">→</span>
-          <div class="jstage"><span>⑤</span><b>奇偶·数论</b><span>对称规律</span></div>
+          <div class="jstage"><span>⑤</span><b>乘法口诀表</b><span>规律与对称</span></div>
+          <div class="jstage"><span>⑥</span><b>奇偶·数论</b><span>对称规律</span></div>
           <span class="jarrow">→</span>
-          <div class="jstage"><span>⑥</span><b>发现规律</b><span>模式·对称</span></div>
+          <div class="jstage"><span>⑦</span><b>发现规律</b><span>模式·对称</span></div>
         </div>
       </div>
       <div class="card">
@@ -392,9 +409,9 @@
           <span class="num-badge" id="numBadge">0</span>
         </div>
         <div class="culture">
-          <div class="c">阿拉伯数字<b>1 2 3</b>现在全世界都用</div>
-          <div class="c">中文数字<b>一 二 三</b>画几笔就是几</div>
-          <div class="c">罗马数字<b>I II III</b>用竖线表示</div>
+          <div class="c" id="numArabic">阿拉伯数字<b id="arabicVal">0</b><br><small>现在全世界都用</small></div>
+          <div class="c" id="numChinese">中文数字<b id="chineseVal" style="color:var(--teal)">零</b><br><small>画几笔就是几</small></div>
+          <div class="c" id="numRoman">罗马数字<b id="romanVal" style="color:var(--orange)"></b><br><small>用竖线表示</small></div>
         </div>
         <div class="explain">🌟 小知识：数字不是天生就有的，它是人类发明出来的“记数工具”。同一个数量，不同文化用不同的符号，但意思都一样——方便我们把世界说清楚。</div>
       </div>
@@ -560,6 +577,17 @@
       </div>
     </section>
 
+
+    <!-- 乘法口诀表 -->
+    <section class="screen" id="ch-multable">
+      <div class="card">
+        <span class="badge">乘法口诀表</span>
+        <h2>✖️ 九九乘法表（扩展到 12×12）</h2>
+        <p class="lead">背熟乘法口诀，算得又快又准！这张表里藏着好多<b>规律</b>：对角线上的数都是「完全平方」，上下对称的两个格子答案一样，颜色越深代表积越大。鼠标悬停看细节！</p>
+        <div class="multable-wrap"><div class="multable" id="multableGrid"></div></div>
+        <div class="explain" id="multableExplain"></div>
+      </div>
+    </section>
     <!-- 奇偶 -->
     <section class="screen" id="ch-parity">
       <div class="card">
@@ -814,7 +842,7 @@ function toast(msg){
 }
 
 /* ---------- navigation ---------- */
-const screens = ['home','ch-origin','ch-add','ch-mul','ch-parity','ch-square','ch-sqrt','ch-area','ch-geo','ch-pattern'];
+const screens = ['home','ch-origin','ch-add','ch-mul','ch-multable','ch-parity','ch-square','ch-sqrt','ch-area','ch-geo','ch-pattern'];
 function show(id){
   screens.forEach(s=>{ const el=$(s); if(el) el.style.display = (s===id?'block':'none'); });
   document.querySelectorAll('.nav-btn').forEach(b=> b.classList.toggle('on', b.dataset.target===id));
@@ -829,6 +857,27 @@ function show(id){
 }
 
 /* ---------- 数字的产生 ---------- */
+function toRoman(n){
+  if(n<=0) return '';
+  const vals=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
+  const syms=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+  let r='';
+  for(let i=0;i<vals.length;i++){ while(n>=vals[i]){ r+=syms[i]; n-=vals[i]; } }
+  return r;
+}
+function toChinese(n){
+  if(n===0) return '零';
+  const digits=['零','一','二','三','四','五','六','七','八','九'];
+  if(n<10) return digits[n];
+  if(n<20) return '十'+(n%10 ? digits[n%10] : '');
+  if(n<100){ const t=Math.floor(n/10); return (t>1?digits[t]:'')+'十'+(n%10?digits[n%9]:''); }
+  return n.toString();
+}
+function updateNumSystems(n){
+  $('arabicVal').textContent=n;
+  $('chineseVal').textContent=toChinese(n);
+  $('romanVal').textContent=toRoman(n);
+}
 let appleCount = 0;
 function addApple(){
   appleCount++;
@@ -844,6 +893,7 @@ function addApple(){
   $('tallyText').textContent = tally.trim() || '（还没有）';
   $('numBadge').textContent = appleCount;
   if(appleCount>0 && appleCount%10===0) toast('🪙 逢十进一！10 个苹果熔成 1 枚十位金币');
+  updateNumSystems(appleCount);
   earn('origin');
 }
 function renderTens(tens, ones){
@@ -851,7 +901,7 @@ function renderTens(tens, ones){
   for(let i=0;i<tens;i++){ const d=document.createElement('div'); d.className='ten-coin'; d.innerHTML='🪙<small>10</small>'; c.appendChild(d); }
   if(ones>0){ const d=document.createElement('div'); d.className='ten-coin'; d.style.opacity='.5'; d.innerHTML='🍎<small>'+ones+'</small>'; c.appendChild(d); }
 }
-function resetOrigin(){ appleCount=0; $('appleShelf').innerHTML=''; $('tensCoins').innerHTML=''; $('tallyText').textContent='（还没有）'; $('numBadge').textContent='0'; }
+function resetOrigin(){ appleCount=0; $('appleShelf').innerHTML=''; $('tensCoins').innerHTML=''; $('tallyText').textContent='（还没有）'; $('numBadge').textContent='0'; updateNumSystems(0); }
 
 /* ---------- 加减法 ---------- */
 function blocks(n, color, delayBase){
@@ -1232,6 +1282,29 @@ function packBags(){
   }
 }
 
+
+/* ---------- 12x12 乘法口诀表 ---------- */
+function renderMultable(){
+  const grid=$('multableGrid'); let h='';
+  h+='<div class=mt-header>&times;</div>';
+  for(let i=1;i<=12;i++) h+='<div class=mt-header>'+i+'</div>';
+  for(let row=1;row<=12;row++){
+    h+='<div class=mt-header>'+row+'</div>';
+    for(let col=1;col<=12;col++){
+      const prod=row*col;
+      const isDiag=row===col;
+      const hue=Math.round(240-(prod/144)*200);
+      const light=isDiag?88:92;
+      const sat=Math.round(55+(prod/144)*25);
+      const cls=isDiag?' diag':'';
+      const clr=Math.round(hue)+','+sat+'%,'+light+'%';
+      const fclr=Math.round(hue)+',30%,'+(isDiag?25:35)+'%';
+      h+='<div class=mt-cell'+cls+' style=background:hsl('+clr+');color:hsl('+fclr+') title='+row+' &times; '+col+' = '+prod+'><span class=mt-sym>'+row+'&times;</span>'+prod+'</div>';
+    }
+  }
+  grid.innerHTML=h;
+  $('multableExplain').innerHTML='<b>找规律：</b>\u{1F538} 对角线（完全平方）是橙色高亮的 1,4,9\u2026144 \u{1F538} 关于对角线对称的格子答案相同 \u{1F538} 颜色从蓝\u2192绿\u2192黄\u2192橙，积越大颜色越暖';
+}
 /* ---------- 奇数偶数 ---------- */
 let parityMax = 10;
 const parityColors = ['#ff5b5b','#ff9f43','#ffd23f','#2ecc71','#18c2b8','#4d96ff','#7c5cff','#b06bff','#ff6ba6','#ff8f5e'];
