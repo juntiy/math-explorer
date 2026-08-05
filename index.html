@@ -814,26 +814,28 @@
         <div class="geo-panel" id="geo-solid">
           <p class="lead" style="margin:4px 0 10px">立体图形有<b>体积</b>（占多大空间）和<b>表面积</b>（表面有多大）。选一种，拖动尺寸，它会转起来，体积和表面积实时算给你看。</p>
           <div class="shape-btns" id="geo3dBtns"></div>
-          <div class="geo3d-wrap">
-            <div class="geo-stage" id="geo3dStage"><div class="geo-illust" id="geo3dIllust"><svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg" style="max-height:210px;width:auto">
-    <defs>
-      <linearGradient id="ckTop0" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff0b3"/><stop offset="100%" stop-color="#ffd54f"/></linearGradient>
-      <linearGradient id="ckL0" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ffca28"/><stop offset="100%" stop-color="#ffb300"/></linearGradient>
-      <linearGradient id="ckR0" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff8f00"/><stop offset="100%" stop-color="#e65100"/></linearGradient>
-    </defs>
-    <ellipse cx="140" cy="205" rx="55" ry="12" fill="rgba(0,0,0,.09)"/>
-    <polygon points="140,45 210,80 210,150 140,185 70,150 70,80" fill="url(#ckL0)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
-    <polygon points="140,45 210,80 280,50 210,15" fill="url(#ckTop0)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
-    <polygon points="210,80 280,50 280,120 210,150" fill="url(#ckR0)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
-    <polygon points="140,45 175,63 175,123 140,105" fill="#fff" opacity=".25"/>
-    <line x1="140" y1="45" x2="140" y2="185" stroke="#5d4037" stroke-width="1.5" opacity=".3"/>
-    <line x1="70" y1="80" x2="210" y2="80" stroke="#5d4037" stroke-width="1.5" opacity=".3"/>
-    <line x1="210" y1="80" x2="210" y2="150" stroke="#5d4037" stroke-width="1.5" opacity=".3"/>
-  </svg></div></div>
+          <div id="geo3dStage" style="text-align:center;padding:16px 0;min-height:220px;background:linear-gradient(180deg,#fafbff 0%,#f0f4ff 100%);border-radius:14px;border:1px dashed #d0d8f0;margin:10px 0">
+            <div id="geo3dIllust" style="display:flex;justify-content:center;align-items:center;min-height:200px">
+            <svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg" style="max-height:210px;width:auto;display:block">
+              <defs>
+                <linearGradient id="ckT0" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff0b3"/><stop offset="100%" stop-color="#ffd54f"/></linearGradient>
+                <linearGradient id="cKL0" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ffca28"/><stop offset="100%" stop-color="#ffb300"/></linearGradient>
+                <linearGradient id="cKR0" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff8f00"/><stop offset="100%" stop-color="#e65100"/></linearGradient>
+              </defs>
+              <ellipse cx="140" cy="205" rx="55" ry="12" fill="rgba(0,0,0,.09)"/>
+              <polygon points="140,45 210,80 210,150 140,185 70,150 70,80" fill="url(#cKL0)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
+              <polygon points="140,45 210,80 280,50 210,15" fill="url(#ckT0)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
+              <polygon points="210,80 280,50 280,120 210,150" fill="url(#cKR0)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
+              <polygon points="140,45 175,63 175,123 140,105" fill="#fff" opacity=".25"/>
+              <line x1="140" y1="45" x2="140" y2="185" stroke="#5d4037" stroke-width="1.5" opacity=".3"/>
+              <line x1="70" y1="80" x2="210" y2="80" stroke="#5d4037" stroke-width="1.5" opacity=".3"/>
+              <line x1="210" y1="80" x2="210" y2="150" stroke="#5d4037" stroke-width="1.5" opacity=".3"/>
+            </svg>
+            </div>
+          </div>
             <div class="geo3d-side">
               <div class="controls col" id="geo3dInputs"></div>
             </div>
-          </div>
           <div class="formula num" id="geo3dFormula"></div>
           <div class="explain" id="geo3dExplain"></div>
         </div>
