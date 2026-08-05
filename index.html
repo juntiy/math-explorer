@@ -309,12 +309,21 @@
   #romanVal{ font-size:26px; letter-spacing:2px; }
   /* ---------- 乘法口诀表 ---------- */
   .multable-wrap{ margin:14px 0; }
-  .multable{ display:grid; grid-template-columns:repeat(13,1fr); gap:2px; max-width:680px; margin:0 auto; font-family:"Baloo 2",sans-serif; }
-  .mt-header{ background:linear-gradient(135deg,#7c5cff,#4d96ff); color:#fff; font-size:13px; font-weight:800; padding:6px 2px; text-align:center; border-radius:4px; }
-  .mt-cell{ background:#fff; border:1px solid var(--line); border-radius:4px; padding:5px 2px; text-align:center; font-size:13px; font-weight:700; transition:.15s; cursor:default; }
-  .mt-cell:hover{ transform:scale(1.08); z-index:2; box-shadow:0 3px 10px rgba(80,90,160,.18); }
-  .mt-cell.diag{ background:linear-gradient(135deg,#fff3e0,#ffe9c7); border-color:#ffcf8f; }
-  .mt-sym{ color:var(--ink-soft); font-weight:400; }
+  .multable{ display:grid; grid-template-columns:repeat(13,1fr); gap:3px; max-width:720px; margin:0 auto; font-family:"Baloo 2",sans-serif; }
+  .mt-header{ background:linear-gradient(135deg,#7c5cff,#4d96ff); color:#fff; font-size:14px; font-weight:800; padding:7px 2px; text-align:center; border-radius:6px; }
+  .mt-cell{ border:1px solid rgba(0,0,0,.08); border-radius:6px; padding:4px 2px; text-align:center; transition:.15s; cursor:default; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.12; box-shadow:0 1px 2px rgba(0,0,0,.08); }
+  .mt-cell:hover, .mt-kj:hover{ transform:scale(1.12); z-index:2; box-shadow:0 5px 16px rgba(80,90,160,.35); }
+  .mt-cell.diag, .mt-kj.diag{ border:2px solid #ff7a00; box-shadow:0 0 0 3px rgba(255,122,0,.3); }
+  .mt-eq{ font-size:11px; color:rgba(255,255,255,.92); font-weight:600; white-space:nowrap; }
+  .mt-ans{ font-size:18px; font-weight:900; color:#fff; }
+  /* 中国 9×9 口诀表（上三角排列） */
+  .mt-cn{ display:grid; grid-template-columns:repeat(10,1fr); gap:4px; max-width:780px; margin:0 auto; }
+  .mt-cn-head{ background:linear-gradient(135deg,#ff7043,#ff5252); color:#fff; font-size:15px; font-weight:800; padding:7px 2px; text-align:center; border-radius:6px; }
+  .mt-cn-rowlab{ background:linear-gradient(135deg,#ff7043,#ff5252); color:#fff; font-size:15px; font-weight:800; padding:7px 2px; text-align:center; border-radius:6px; }
+  .mt-kj{ border:1px solid rgba(0,0,0,.08); border-radius:6px; padding:6px 1px; text-align:center; transition:.15s; cursor:default; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.15; box-shadow:0 1px 2px rgba(0,0,0,.08); }
+  .mt-kj .kj{ font-size:12px; font-weight:700; color:#fff; letter-spacing:.5px; }
+  .mt-kj .kj-ans{ font-size:16px; font-weight:900; color:#fff; }
+  .mt-empty{ }
 
 </style>
 </head>
@@ -582,9 +591,14 @@
     <section class="screen" id="ch-multable">
       <div class="card">
         <span class="badge">乘法口诀表</span>
-        <h2>✖️ 九九乘法表（扩展到 12×12）</h2>
-        <p class="lead">背熟乘法口诀，算得又快又准！这张表里藏着好多<b>规律</b>：对角线上的数都是「完全平方」，上下对称的两个格子答案一样，颜色越深代表积越大。鼠标悬停看细节！</p>
-        <div class="multable-wrap"><div class="multable" id="multableGrid"></div></div>
+        <h2>✖️ 乘法口诀表（🇨🇳 9×9 中国口诀 · 🌈 12×12 彩色彩律）</h2>
+        <p class="lead">背熟乘法口诀，算得又快又准！两种表各有规律：<b>中国 9×9 口诀表</b>用「一一得一、二三得六」的口诀读出来；<b>彩色 12×12 表</b>里对角线都是「完全平方」，颜色越暖代表积越大。每格都标了答案，鼠标悬停看算式！</p>
+        <div class="seg" style="justify-content:center;margin:4px 0 14px">
+          <button class="seg-btn on" id="mtSegCN" onclick="setMulTableMode('cn')">🇨🇳 9×9 中国口诀</button>
+          <button class="seg-btn" id="mtSeg12" onclick="setMulTableMode('12')">🌈 12×12 彩色彩律</button>
+        </div>
+        <div class="multable-wrap" id="mtWrapCN" style="display:none"><div class="mt-cn" id="multableCN"></div></div>
+        <div class="multable-wrap" id="mtWrap12"><div class="multable" id="multableGrid"></div></div>
         <div class="explain" id="multableExplain"></div>
       </div>
     </section>
@@ -1285,7 +1299,9 @@ function packBags(){
 
 
 /* ---------- 12x12 乘法口诀表 ---------- */
+let mtMode='12';
 function renderMultable(){
+  if(mtMode==='cn'){ renderMultableCN(); return; }
   const grid=$('multableGrid'); let h='';
   h+='<div class=mt-header>&times;</div>';
   for(let i=1;i<=12;i++) h+='<div class=mt-header>'+i+'</div>';
@@ -1294,17 +1310,53 @@ function renderMultable(){
     for(let col=1;col<=12;col++){
       const prod=row*col;
       const isDiag=row===col;
-      const hue=Math.round(240-(prod/144)*200);
-      const light=isDiag?88:92;
-      const sat=Math.round(55+(prod/144)*25);
+      const hue=Math.round(225-(prod/144)*200);
+      const light=isDiag?60:55;
+      const sat=Math.round(72+(prod/144)*20);
       const cls=isDiag?' diag':'';
-      const clr=Math.round(hue)+','+sat+'%,'+light+'%';
-      const fclr=Math.round(hue)+',30%,'+(isDiag?25:35)+'%';
-      h+='<div class=mt-cell'+cls+' style=background:hsl('+clr+');color:hsl('+fclr+') title='+row+' &times; '+col+' = '+prod+'><span class=mt-sym>'+row+'&times;</span>'+prod+'</div>';
+      const bg='hsl('+hue+','+sat+'%,'+light+'%)';
+      h+='<div class="mt-cell'+cls+'" style="background:'+bg+'" title="'+row+' × '+col+' = '+prod+'">'
+        +'<span class="mt-eq">'+row+'×'+col+'</span>'
+        +'<span class="mt-ans">'+prod+'</span></div>';
     }
   }
   grid.innerHTML=h;
-  $('multableExplain').innerHTML='<b>找规律：</b>\u{1F538} 对角线（完全平方）是橙色高亮的 1,4,9\u2026144 \u{1F538} 关于对角线对称的格子答案相同 \u{1F538} 颜色从蓝\u2192绿\u2192黄\u2192橙，积越大颜色越暖';
+  $('multableExplain').innerHTML='<b>🌈 12×12 彩色彩律：</b>🔶 对角线（完全平方）橙色描边高亮：1,4,9…144 🔶 关于对角线对称的格子答案相同 🔶 颜色从蓝→青→绿→黄→橙，积越大颜色越暖，答案写在每格下方';
+}
+function koujue(a,b){
+  const p=a*b;
+  return p<10 ? (a+''+b+'得'+p) : (a+''+b+p);
+}
+function renderMultableCN(){
+  const grid=$('multableCN'); let h='';
+  h+='<div class=mt-cn-head>&times;</div>';
+  for(let i=1;i<=9;i++) h+='<div class=mt-cn-head>'+i+'</div>';
+  for(let row=1;row<=9;row++){
+    h+='<div class=mt-cn-rowlab>'+row+'</div>';
+    for(let col=1;col<=9;col++){
+      if(col<row){ h+='<div class=mt-empty></div>'; continue; }
+      const prod=row*col;
+      const isDiag=row===col;
+      const hue=Math.round(225-(prod/81)*200);
+      const light=isDiag?60:55;
+      const sat=Math.round(72+(prod/81)*20);
+      const bg='hsl('+hue+','+sat+'%,'+light+'%)';
+      const kj=koujue(row,col);
+      h+='<div class="mt-kj'+ (isDiag?' diag':'') +'" style="background:'+bg+'" title="'+row+' × '+col+' = '+prod+'">'
+        +'<span class="kj">'+kj+'</span>'
+        +'<span class="kj-ans">'+prod+'</span></div>';
+    }
+  }
+  grid.innerHTML=h;
+  $('multableExplain').innerHTML='<b>🇨🇳 9×9 中国口诀（小九九）：</b>每行只从「本数」开始向右排（上三角），口诀读法如「二三得六」「三四十二」——个位结果带「得」，十位结果直接读。被乘数固定、乘数往后数，答案写在每句下面。';
+}
+function setMulTableMode(m){
+  mtMode=m;
+  $('mtSegCN').classList.toggle('on', m==='cn');
+  $('mtSeg12').classList.toggle('on', m==='12');
+  $('mtWrapCN').style.display = m==='cn' ? 'block':'none';
+  $('mtWrap12').style.display = m==='12' ? 'block':'none';
+  renderMultable();
 }
 /* ---------- 奇数偶数 ---------- */
 let parityMax = 10;
