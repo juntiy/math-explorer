@@ -104,7 +104,7 @@
   .shape-btns{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:10px 0; }
   .shape-btns button{ border:2px solid var(--line); background:#fff; border-radius:12px; padding:8px 14px; cursor:pointer; font-family:inherit; font-size:14px; }
   .shape-btns button.on{ border-color:var(--purple); background:#f1f0ff; color:var(--purple); }
-  .geo-stage{ perspective:820px; height:320px; display:flex; align-items:center; justify-content:center; margin:10px 0; }
+  .geo-stage{ perspective:820px; min-height:320px; height:auto; display:flex; align-items:center; justify-content:center; margin:10px 0; overflow:visible; }
   .shape3d{ position:relative; transform-style:preserve-3d; animation:spin3d 14s linear infinite; }
   @keyframes spin3d{ 0%{ transform:rotateX(-22deg) rotateY(0); } 100%{ transform:rotateX(-22deg) rotateY(360deg); } }
   .cube{ width:150px; height:150px; }
@@ -168,8 +168,8 @@
   .solid-tag b{ color:#ff6ba6; }
   .scaleWrap{ transition:transform .35s ease; }
   @keyframes fadeIn{ from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-  .geo-illust{ display:flex; align-items:center; justify-content:center; min-height:220px; padding:8px 0; animation:fadeIn .5s ease; }
-  .geo-illust svg{ max-height:210px; width:auto; filter:drop-shadow(0 6px 16px rgba(40,50,90,.18)); }
+  .geo-illust{ display:flex !important; align-items:center; justify-content:center; min-height:220px; padding:8px 0; animation:fadeIn .5s ease; overflow:visible; width:100%; }
+  .geo-illust svg{ display:block !important; max-height:210px; width:auto; height:auto; filter:drop-shadow(0 6px 16px rgba(40,50,90,.18)); visibility:visible !important; }
   .shape-btn{ border:2px solid var(--line); background:#fff; border-radius:12px; padding:7px 12px; cursor:pointer; font-family:inherit; font-size:14px; transition:.15s; }
   .shape-btn:hover{ border-color:var(--purple); }
   .shape-btn.on{ background:var(--purple); color:#fff; border-color:var(--purple); }
@@ -815,7 +815,21 @@
           <p class="lead" style="margin:4px 0 10px">立体图形有<b>体积</b>（占多大空间）和<b>表面积</b>（表面有多大）。选一种，拖动尺寸，它会转起来，体积和表面积实时算给你看。</p>
           <div class="shape-btns" id="geo3dBtns"></div>
           <div class="geo3d-wrap">
-            <div class="geo-stage" id="geo3dStage"></div>
+            <div class="geo-stage" id="geo3dStage"><div class="geo-illust" id="geo3dIllust"><svg viewBox="0 0 280 240" xmlns="http://www.w3.org/2000/svg" style="max-height:210px;width:auto">
+    <defs>
+      <linearGradient id="ckTop0" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fff0b3"/><stop offset="100%" stop-color="#ffd54f"/></linearGradient>
+      <linearGradient id="ckL0" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ffca28"/><stop offset="100%" stop-color="#ffb300"/></linearGradient>
+      <linearGradient id="ckR0" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff8f00"/><stop offset="100%" stop-color="#e65100"/></linearGradient>
+    </defs>
+    <ellipse cx="140" cy="205" rx="55" ry="12" fill="rgba(0,0,0,.09)"/>
+    <polygon points="140,45 210,80 210,150 140,185 70,150 70,80" fill="url(#ckL0)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="140,45 210,80 280,50 210,15" fill="url(#ckTop0)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="210,80 280,50 280,120 210,150" fill="url(#ckR0)" stroke="#5d4037" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="140,45 175,63 175,123 140,105" fill="#fff" opacity=".25"/>
+    <line x1="140" y1="45" x2="140" y2="185" stroke="#5d4037" stroke-width="1.5" opacity=".3"/>
+    <line x1="70" y1="80" x2="210" y2="80" stroke="#5d4037" stroke-width="1.5" opacity=".3"/>
+    <line x1="210" y1="80" x2="210" y2="150" stroke="#5d4037" stroke-width="1.5" opacity=".3"/>
+  </svg></div></div>
             <div class="geo3d-side">
               <div class="controls col" id="geo3dInputs"></div>
             </div>
@@ -1776,7 +1790,7 @@ function onGeo3d(k,v){ $('g3_'+k).textContent=v; drawGeo3d(); }
 function drawGeo3d(){
   const cfg=GEO3D[geo3dType], d={}; cfg.inputs.forEach(inp=> d[inp.k]=+$('g3_'+inp.k).textContent);
   const res=cfg.calc(d);
-  $('geo3dStage').innerHTML=cfg.html(d);
+  $('geo3dIllust').innerHTML = cfg.html(d);
   $('geo3dFormula').innerHTML=res.formula;
   $('geo3dExplain').innerHTML=res.explain+`<div style="margin-top:6px">`+cfg.inputs.map(inp=>`<span class="solid-tag">${inp.label}=<b>${d[inp.k]}</b></span>`).join('')+`</div>`;
 }
