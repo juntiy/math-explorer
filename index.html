@@ -715,12 +715,12 @@ function drawBar(canvas, a, b, op, maxN, anim){
   ctx.clearRect(0,0,W,H);
   maxN=Math.max(maxN,10);
   const x0=46, x1=W-24, U=x1-x0;
-  const unit=U/maxN, bh=48, yc=70;
+  const unit=U/maxN, bh=56, yc=70;
   const cA=['#9bbeff','#4d96ff'], cB=['#9be7c9','#18c2b8'], cR=['#ffb3c1','#ff6b6b'];
   // 整十刻度线：帮孩子看清“十位”在哪，数字大了也不慌
   ctx.save(); ctx.strokeStyle='rgba(124,92,255,.22)'; ctx.lineWidth=1.4; ctx.setLineDash([5,4]);
-  ctx.fillStyle='#a99fe0'; ctx.font='11px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='bottom';
-  for(let t=10;t<=maxN-0.001;t+=10){ const xt=x0+t*unit; ctx.beginPath(); ctx.moveTo(xt,30); ctx.lineTo(xt,yc+bh/2+4); ctx.stroke(); ctx.fillText(t,xt,yc-bh/2-6); }
+  ctx.fillStyle='#a99fe0'; ctx.font='13px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+  for(let t=10;t<=maxN-0.001;t+=10){ const xt=x0+t*unit; ctx.beginPath(); ctx.moveTo(xt,30); ctx.lineTo(xt,yc+bh/2+4); ctx.stroke(); ctx.fillText(t,xt,yc-bh/2-8); }
   ctx.restore();
   function bar(x,w,c1,c2,label){
     if(w<=0) return;
@@ -731,28 +731,28 @@ function drawBar(canvas, a, b, op, maxN, anim){
     ctx.arcTo(x+w,yc-bh/2,x+w,yc+bh/2,r); ctx.arcTo(x+w,yc+bh/2,x,yc+bh/2,r);
     ctx.arcTo(x,yc+bh/2,x,yc-bh/2,r); ctx.arcTo(x,yc-bh/2,x+w,yc-bh/2,r);
     ctx.closePath(); ctx.fill();
-    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 17px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x+w/2,yc); }
+    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 26px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x+w/2,yc); }
   }
   function bracket(x,w,label){
     if(w<=0) return;
     ctx.strokeStyle='#7c5cff'; ctx.lineWidth=2;
     const yb=yc+bh/2+12;
     ctx.beginPath(); ctx.moveTo(x,yb); ctx.lineTo(x,yb+7); ctx.lineTo(x+w,yb+7); ctx.lineTo(x+w,yb); ctx.stroke();
-    ctx.fillStyle='#7c5cff'; ctx.font='bold 16px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(label,x+w/2,yb+10);
+    ctx.fillStyle='#7c5cff'; ctx.font='bold 22px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(label,x+w/2,yb+12);
   }
   if(op==='+'){
     const gap=(anim==null?0:anim), wA=a*unit, wB=b*unit;
     bar(x0, wA, cA[0],cA[1], a);
     bar(x0+wA+gap, wB, cB[0],cB[1], b);
     if(gap<0.5) bracket(x0, wA+wB, '= '+(a+b));
-    ctx.fillStyle='#2b2d42'; ctx.font='bold 16px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillStyle='#2b2d42'; ctx.font='bold 20px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
     ctx.fillText(a+' + '+b+' = '+(a+b), W-20, 12);
   } else {
     const taken=Math.min(b,a), off=(anim==null?0:anim), wA=a*unit, wT=taken*unit;
     bar(x0, wA-wT, cA[0],cA[1], a-taken);
     bar(x0+wA-wT+off, wT, cR[0],cR[1], taken);
     if(off<0.5) bracket(x0, wA-wT, '= '+(a-taken));
-    ctx.fillStyle='#2b2d42'; ctx.font='bold 16px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillStyle='#2b2d42'; ctx.font='bold 20px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
     ctx.fillText(a+' − '+b+' = '+(a-taken), W-20, 12);
   }
 }
@@ -849,7 +849,7 @@ function drawCompare(canvas, a, b, maxN, anim){
   const ctx=canvas.getContext('2d'); const W=canvas.width,H=canvas.height;
   ctx.clearRect(0,0,W,H);
   maxN=Math.max(maxN,10);
-  const x0=46, x1=W-24, U=x1-x0, unit=U/maxN, bh=40, yA=58, yB=120;
+  const x0=46, x1=W-24, U=x1-x0, unit=U/maxN, bh=48, yA=58, yB=122;
   const big=Math.max(a,b), small=Math.min(a,b), diff=big-small;
   const cMine=['#9bbeff','#4d96ff'], cBro=['#9be7c9','#18c2b8'], cDiff=['#ffd0a6','#ff9f43'];
   function bar(y,len,c1,c2,label){
@@ -859,7 +859,7 @@ function drawCompare(canvas, a, b, maxN, anim){
     ctx.fillStyle=g; ctx.beginPath(); ctx.moveTo(x0+r,y-bh/2);
     ctx.arcTo(x0+w,y-bh/2,x0+w,y+bh/2,r); ctx.arcTo(x0+w,y+bh/2,x0,y+bh/2,r);
     ctx.arcTo(x0,y+bh/2,x0,y-bh/2,r); ctx.arcTo(x0,y-bh/2,x0+w,y-bh/2,r); ctx.closePath(); ctx.fill();
-    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 16px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x0+w/2,y); }
+    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 24px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x0+w/2,y); }
   }
   if(small>0){ ctx.fillStyle='rgba(124,92,255,.12)'; ctx.fillRect(x0, yA-bh/2, small*unit, (yB+bh/2)-(yA-bh/2)); }
   bar(yA, a, cMine[0],cMine[1], a);
@@ -868,15 +868,15 @@ function drawCompare(canvas, a, b, maxN, anim){
     const animW=diff*unit*(anim==null?1:anim), xL=x0+small*unit, yD=(a>=b)?yA:yB;
     const g=ctx.createLinearGradient(xL,yD-bh/2,xL,yD+bh/2); g.addColorStop(0,cDiff[0]); g.addColorStop(1,cDiff[1]);
     ctx.fillStyle=g; ctx.fillRect(xL, yD-bh/2, animW, bh);
-    if(animW>14){ ctx.fillStyle='#7a3b00'; ctx.font='bold 15px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(diff, xL+animW/2, yD); }
+    if(animW>14){ ctx.fillStyle='#7a3b00'; ctx.font='bold 22px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(diff, xL+animW/2, yD); }
     const yb=yD+bh/2+10; ctx.strokeStyle='#ff9f43'; ctx.lineWidth=2;
     ctx.beginPath(); ctx.moveTo(xL,yb); ctx.lineTo(xL,yb+6); ctx.lineTo(xL+animW,yb+6); ctx.lineTo(xL+animW,yb); ctx.stroke();
-    ctx.fillStyle='#ff9f43'; ctx.font='bold 14px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText('相差 '+diff, xL+animW/2, yb+9);
+    ctx.fillStyle='#ff9f43'; ctx.font='bold 19px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText('相差 '+diff, xL+animW/2, yb+10);
   }
   ctx.textAlign='left'; ctx.textBaseline='middle';
-  ctx.fillStyle='#4d96ff'; ctx.font='bold 14px Baloo 2'; ctx.fillText('我（'+a+'）', x0, yA-bh/2-12);
-  ctx.fillStyle='#18c2b8'; ctx.fillText('弟（'+b+'）', x0, yB-bh/2-12);
-  ctx.fillStyle='#2b2d42'; ctx.font='bold 15px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
+  ctx.fillStyle='#4d96ff'; ctx.font='bold 18px Baloo 2'; ctx.fillText('我（'+a+'）', x0, yA-bh/2-14);
+  ctx.fillStyle='#18c2b8'; ctx.fillText('弟（'+b+'）', x0, yB-bh/2-14);
+  ctx.fillStyle='#2b2d42'; ctx.font='bold 18px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
   const txt = diff===0 ? '一样多！' : (a>=b ? ('我比弟多 '+diff) : ('弟比我多 '+diff));
   ctx.fillText('我 '+a+'，弟 '+b+' → '+txt, W-20, 12);
 }
@@ -884,7 +884,7 @@ function drawStrategy(canvas, a, b, op, maxN, anim){
   const ctx=canvas.getContext('2d'); const W=canvas.width,H=canvas.height;
   ctx.clearRect(0,0,W,H);
   maxN=Math.max(maxN,10);
-  const x0=46, x1=W-24, U=x1-x0, unit=U/maxN, bh=48, yc=82;
+  const x0=46, x1=W-24, U=x1-x0, unit=U/maxN, bh=56, yc=82;
   const cA=['#9bbeff','#4d96ff'], cB=['#9be7c9','#18c2b8'], cC=['#bfeaff','#4dc3ff'], cR=['#ffb3c1','#ff6b6b'];
   function bar(x,w,c1,c2,label){
     if(w<=0) return;
@@ -893,7 +893,7 @@ function drawStrategy(canvas, a, b, op, maxN, anim){
     ctx.fillStyle=g; ctx.beginPath(); ctx.moveTo(x+r,yc-bh/2);
     ctx.arcTo(x+w,yc-bh/2,x+w,yc+bh/2,r); ctx.arcTo(x+w,yc+bh/2,x,yc+bh/2,r);
     ctx.arcTo(x,yc+bh/2,x,yc-bh/2,r); ctx.arcTo(x,yc-bh/2,x+w,yc-bh/2,r); ctx.closePath(); ctx.fill();
-    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 16px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x+w/2,yc); }
+    if(w>16){ ctx.fillStyle='#fff'; ctx.font='bold 26px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x+w/2,yc); }
   }
   function takenRect(x,w){
     if(w<=0) return;
@@ -903,19 +903,19 @@ function drawStrategy(canvas, a, b, op, maxN, anim){
   function vline(v,color,label){
     const x=x0+v*unit; ctx.strokeStyle=color; ctx.lineWidth=1.6; ctx.setLineDash([5,5]);
     ctx.beginPath(); ctx.moveTo(x,30); ctx.lineTo(x,yc+bh/2+4); ctx.stroke(); ctx.setLineDash([]);
-    if(label){ ctx.fillStyle=color; ctx.font='bold 12px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='bottom'; ctx.fillText(label,x,28); }
+    if(label){ ctx.fillStyle=color; ctx.font='bold 15px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='bottom'; ctx.fillText(label,x,28); }
   }
   function bracket(x,w,label,color){
     if(w<=0) return; ctx.strokeStyle=color||'#7c5cff'; ctx.lineWidth=2; const yb=yc+bh/2+12;
     ctx.beginPath(); ctx.moveTo(x,yb); ctx.lineTo(x,yb+7); ctx.lineTo(x+w,yb+7); ctx.lineTo(x+w,yb); ctx.stroke();
-    ctx.fillStyle=color||'#7c5cff'; ctx.font='bold 15px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(label,x+w/2,yb+10);
+    ctx.fillStyle=color||'#7c5cff'; ctx.font='bold 22px Baloo 2'; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(label,x+w/2,yb+12);
   }
   if(op==='+'){
     const need=(a%10===0)?10:(10-(a%10)), gap=(anim==null?0:anim);
     if(need>b || b===0){
       bar(x0, a*unit, cA[0],cA[1], a); bar(x0+a*unit, b*unit, cB[0],cB[1], b);
       bracket(x0, (a+b)*unit, '= '+(a+b));
-      ctx.fillStyle='#2b2d42'; ctx.font='bold 15px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top'; ctx.fillText('这个直接加就够啦～', W-20, 12);
+      ctx.fillStyle='#2b2d42'; ctx.font='bold 18px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top'; ctx.fillText('这个直接加就够啦～', W-20, 12);
       return;
     }
     const rest=b-need, T=a+need;
@@ -925,7 +925,7 @@ function drawStrategy(canvas, a, b, op, maxN, anim){
     vline(T, '#7c5cff', '凑成 '+T);
     bracket(x0, T*unit, T, '#7c5cff');
     if(rest>0) bracket(x0+T*unit+8, rest*unit, rest, '#4dc3ff');
-    ctx.fillStyle='#2b2d42'; ctx.font='bold 15px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
+    ctx.fillStyle='#2b2d42'; ctx.font='bold 18px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
     ctx.fillText(`${a} + ${b} = ${a}+${need}+${rest} = ${T}+${rest} = ${a+b}`, W-20, 12);
   } else {
     const ones=a%10, tens=a-ones, take=Math.min(b,a);
@@ -933,14 +933,14 @@ function drawStrategy(canvas, a, b, op, maxN, anim){
     if(take<=ones){
       bar(x0, a*unit, cA[0],cA[1], a); takenRect(x0+(a-take)*unit, take*unit);
       bracket(x0, (a-take)*unit, '= '+(a-take));
-      ctx.fillStyle='#2b2d42'; ctx.font='bold 15px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top'; ctx.fillText(`${a} − ${b} = ${a-b}`, W-20, 12);
+      ctx.fillStyle='#2b2d42'; ctx.font='bold 18px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top'; ctx.fillText(`${a} − ${b} = ${a-b}`, W-20, 12);
     } else {
       const after=take-ones;
       bar(x0, a*unit, cA[0],cA[1], a);
       takenRect(x0+tens*unit, ones*unit);
       takenRect(x0+(tens-after)*unit, after*unit);
       bracket(x0, (tens-after)*unit, '= '+(a-take), '#4dc3ff');
-      ctx.fillStyle='#2b2d42'; ctx.font='bold 15px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
+      ctx.fillStyle='#2b2d42'; ctx.font='bold 18px Baloo 2'; ctx.textAlign='right'; ctx.textBaseline='top';
       ctx.fillText(`${a} − ${b} = ${a}−${ones}−${after} = ${tens}−${after} = ${a-b}`, W-20, 12);
     }
   }
