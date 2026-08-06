@@ -1703,20 +1703,48 @@ function drawPi(){
 }
 function piRoll(){
   const r=+$('piR').value; const R=r*0.85;
-  const g=$('piRollG'); if(!g) return; const cx0=R+18, y=210-R, dist=2*Math.PI*R;
+  const g=$('piRollG'); if(!g) return;
+  const cx0=R+18, y=210-R, dist=2*Math.PI*R;
   const dur=1700, t0=performance.now(); let landed=false;
+  // Pre-create the dimension line (hidden initially)
+  const svg=$('piSvg');
+  let dimG=svg.getElementById('piRollDim');
+  if(!dimG){
+    dimG=document.createElementNS('http://www.w3.org/2000/svg','g');
+    dimG.setAttribute('id','piRollDim');
+    dimG.setAttribute('opacity','0');
+    svg.appendChild(dimG);
+  }else{ dimG.innerHTML=''; dimG.setAttribute('opacity','0'); }
+  // Build dimension line content (will be shown when animation ends)
+  const landX=cx0+dist;
+  const baseY=210;
+  dimG.innerHTML=
+    `<line x1="${cx0}" y1="${baseY+28}" x2="${landX}" y2="${baseY+28}" stroke="#7c5cff" stroke-width="2.5"/>`+
+    `<line x1="${cx0}" y1="${baseY+22}" x2="${cx0}" y2="${baseY+34}" stroke="#7c5cff" stroke-width="2"/>`+
+    `<line x1="${landX}" y1="${baseY+22}" x2="${landX}" y2="${baseY+34}" stroke="#7c5cff" stroke-width="2"/>`+
+    `<text x="${(cx0+landX)/2}" y="${baseY+46}" text-anchor="middle" font-size="13" font-family="Baloo 2,sans-serif" fill="#7c5cff" font-weight="700">周长 = 2πr ≈ ${dist.toFixed(0)}</text>`+
+    `<text x="${cx0-4}" y="${baseY+44}" text-anchor="end" font-size="11" font-family="Baloo 2,sans-serif" fill="#888">起点</text>`+
+    `<text x="${landX+4}" y="${baseY+44}" text-anchor="start" font-size="11" font-family="Baloo 2,sans-serif" fill="#888">终点</text>`;
   function frame(t){
     const p=Math.min(1,(t-t0)/dur); const cx=cx0+dist*p; const ang=p*360;
     g.setAttribute('transform',`translate(${cx},${y}) rotate(${ang})`);
     if(p>=1 && !landed){ landed=true;
-      const svg=$('piSvg'); const landX=cx0+dist;
+      // Show vertical landing mark
       const mark=document.createElementNS('http://www.w3.org/2000/svg','line');
-      mark.setAttribute('x1',landX); mark.setAttribute('y1',y-R-14); mark.setAttribute('x2',landX); mark.setAttribute('y2',y+R+14);
-      mark.setAttribute('stroke','#ff6ba6'); mark.setAttribute('stroke-width','3');
+      mark.setAttribute('x1',landX); mark.setAttribute('y1',y-R-12);
+      mark.setAttribute('x2',landX); mark.setAttribute('y2',baseY+36);
+      mark.setAttribute('stroke','#ff6ba6'); mark.setAttribute('stroke-width','2');
+      mark.setAttribute('stroke-dasharray','4,3');
       svg.appendChild(mark);
+      // Label above
       const tx=document.createElementNS('http://www.w3.org/2000/svg','text');
-      tx.setAttribute('class','glabel'); tx.setAttribute('x',landX-6); tx.setAttribute('y',y-R-18); tx.setAttribute('text-anchor','middle');
-      tx.textContent=`周长≈${dist.toFixed(0)}`; svg.appendChild(tx);
+      tx.setAttribute('class','glabel'); tx.setAttribute('x',landX);
+      tx.setAttribute('y',y-R-18); tx.setAttribute('text-anchor','middle');
+      tx.setAttribute('fill','#ff6ba6'); tx.setAttribute('font-weight','700');
+      tx.textContent=`周长≈${dist.toFixed(0)}`;
+      svg.appendChild(tx);
+      // Show dimension line below
+      requestAnimationFrame(()=>{ dimG.style.transition='opacity .4s'; dimG.setAttribute('opacity','1'); });
       $('piFormula').innerHTML=`周长 ≈ <b>${dist.toFixed(1)}</b>　|　直径 = 2r = <b>${2*r}</b>　|　π = 周长 ÷ 直径 ≈ <b>${(dist/(2*r)).toFixed(4)}</b>`;
       $('piExplain').innerHTML=`圆滚一圈刚好走了一个<b>周长</b>，落点和起点之间距离就是周长。周长 ÷ 直径 = π，无论圆多大，结果都奔向 <b>3.14159…</b>`;
       sfx('ok');
@@ -1727,72 +1755,73 @@ function piRoll(){
 }
 function piUnroll(){
   const svg=$('piSvg');
-  const R=60, cx=110, cy=140, N=16;
+  const R=58, cx=105, cy=135, N=16;
   const ns='http://www.w3.org/2000/svg';
   svg.innerHTML='';
   // baseline
   svg.appendChild(mkline(10,220,450,220,'#ccc',1.5));
-  // ghost circle on the left
+  // ghost circle on left
   const circ=document.createElementNS(ns,'circle');
   circ.setAttribute('cx',cx); circ.setAttribute('cy',cy); circ.setAttribute('r',R);
   circ.setAttribute('fill','rgba(255,159,67,.10)'); circ.setAttribute('stroke','#ff9f43');
   circ.setAttribute('stroke-width','1.8'); circ.setAttribute('stroke-dasharray','5,4');
   svg.appendChild(circ);
-  // sector geometry
+  // Sector geometry
   const step=(2*Math.PI)/N;
-  const arcLen=Math.PI*R/N;       // half-circumference per sector
-  const tileW=arcLen*1.35;         // visual width when tiled (slight gap for clarity)
-  const startX=250;                // tiled row starts here
-  const baseY=175;                 // baseline Y for tiled row (sector tips sit here)
-  const tipH=R*0.88;               // tip-to-arc height in tiled state
+  const arcLen=Math.PI*R/N;          // half-circumference per sector
+  const tileW=arcLen*1.32;            // visual width when tiled
+  const startX=245;                   // tiled row starts here
+  const baseY=170;                    // baseline Y for tiled row
+  const tipH=R*0.90;                  // tip-to-arc height in tiled state
+  const sectors=[];
   for(let i=0;i<N;i++){
-    const a0=-Math.PI/2+i*step;     // start angle (from top, clockwise)
-    const a1=a0+step;               // end angle
-    // Arc endpoints (on the circle)
-    const ax0=cx+R*Math.cos(a0), ay0=cy+R*Math.sin(a0);
-    const ax1=cx+R*Math.cos(a1), ay1=cy+R*Math.sin(a1);
-    // Draw sector with TIP at origin (0,0), arc going out
+    const a0=-Math.PI/2+i*step;
+    const a1=a0+step;
+    // Arc endpoints relative to center
+    const ax0=R*Math.cos(a0), ay0=R*Math.sin(a0);
+    const ax1=R*Math.cos(a1), ay1=R*Math.sin(a1);
+    // Create GROUP for each sector (reliable SVG transform)
+    const g=document.createElementNS(ns,'g');
+    g.setAttribute('class','pi-sector-g');
+    // Sector path with tip at (0,0)
     const p=document.createElementNS(ns,'path');
-    const largeArc=step>Math.PI?1:0;
-    const dx0=ax0-cx, dy0=ay0-cy;
-    const dx1=ax1-cx, dy1=ay1-cy;
-    p.setAttribute('d',`M0,0 L${dx0.toFixed(1)},${dy0.toFixed(1)} A${R},${R} 0 ${largeArc},1 ${dx1.toFixed(1)},${dy1.toFixed(1)} Z`);
-    p.setAttribute('fill', i%2?'rgba(255,210,63,.60)':'rgba(255,159,67,.60)');
+    const la=step>Math.PI?1:0;
+    p.setAttribute('d',`M0,0 L${ax0.toFixed(1)},${ay0.toFixed(1)} A${R},${R} 0 ${la},1 ${ax1.toFixed(1)},${ay1.toFixed(1)} Z`);
+    p.setAttribute('fill', i%2?'rgba(255,210,63,.65)':'rgba(255,159,67,.65)');
     p.setAttribute('stroke','#fff'); p.setAttribute('stroke-width','1.2');
-    p.setAttribute('class','pi-sector');
-    // Position in CIRCLE state: tip at (cx,cy)
-    p.style.transform=`translate(${cx}px,${cy}px)`;
-    p.style.transformOrigin='0px 0px';
-    svg.appendChild(p);
-    // Compute TARGET position for tiled row
+    g.appendChild(p);
+    // Initial position: form the circle
+    g.setAttribute('transform',`translate(${cx},${cy})`);
+    svg.appendChild(g);
+    sectors.push({g:g, i:i});
+    // Target: tiled row position
     const tx=startX+i*tileW;
     const isOdd=(i%2===1);
     const ty=isOdd?(baseY-tipH):baseY;
     const rot=isOdd?180:0;
-    p.dataset.targetX=tx;
-    p.dataset.targetY=ty;
-    p.dataset.targetRot=rot;
+    g.dataset.tx=tx; g.dataset.ty=ty; g.dataset.rot=rot;
   }
-  // Animate to tiled positions
+  // Animate to tiled positions using SVG transform attribute
   setTimeout(()=>{
-    svg.querySelectorAll('.pi-sector').forEach(p=>{
-      p.style.transition='transform .8s cubic-bezier(.25,.46,.45,.94)';
-      const tx=+p.dataset.targetX, ty=+p.dataset.targetY, r=+p.dataset.targetRot;
-      p.style.transform=`translate(${tx}px,${ty}px) rotate(${r}deg)`;
+    sectors.forEach(({g})=>{
+      const tx=+g.dataset.tx, ty=+g.dataset.ty, r=+g.dataset.rot;
+      g.style.transition='transform .8s cubic-bezier(.25,.46,.45,.94)';
+      // Use CSS transition on the group element (more reliable than on path)
+      g.style.transform=`translate(${tx}px,${ty}px) rotate(${r}deg)`;
     });
     // Dimension labels after animation
     setTimeout(()=>{
       const rectW=N*tileW;
-      const g=document.createElementNS(ns,'g');
-      g.setAttribute('opacity','0');
-      g.innerHTML=
+      const dg=document.createElementNS(ns,'g');
+      dg.setAttribute('opacity','0');
+      dg.innerHTML=
         `<line x1="${startX-6}" y1="${baseY+tipH+12}" x2="${startX+rectW+6}" y2="${baseY+tipH+12}" stroke="#ff6ba6" stroke-width="1.8" stroke-dasharray="4,3"/>`+
         `<line x1="${startX-6}" y1="${baseY-tipH-4}" x2="${startX-6}" y2="${baseY+tipH+12}" stroke="#ff6ba6" stroke-width="1.8" stroke-dasharray="4,3"/>`+
         `<line x1="${startX+rectW+6}" y1="${baseY-tipH-4}" x2="${startX+rectW+6}" y2="${baseY+tipH+12}" stroke="#ff6ba6" stroke-width="1.8" stroke-dasharray="4,3"/>`+
         `<text x="${startX+rectW/2}" y="${baseY+tipH+26}" text-anchor="middle" font-size="12" font-family="Baloo 2,sans-serif" fill="#ff6ba6" font-weight="600">长 ≈ πr</text>`+
         `<text x="${startX+rectW+14}" y="${baseY+4}" text-anchor="start" font-size="12" font-family="Baloo 2,sans-serif" fill="#ff6ba6" font-weight="600">宽=r</text>`;
-      svg.appendChild(g);
-      requestAnimationFrame(()=>{ g.style.transition='opacity .4s'; g.setAttribute('opacity','1'); });
+      svg.appendChild(dg);
+      requestAnimationFrame(()=>{ dg.style.transition='opacity .4s'; dg.setAttribute('opacity','1'); });
     },900);
   },300);
   piUnrolled=true;
