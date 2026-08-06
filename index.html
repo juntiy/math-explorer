@@ -1768,62 +1768,66 @@ function piUnroll(){
   svg.appendChild(circ);
   // Sector geometry
   const step=(2*Math.PI)/N;
-  const arcLen=Math.PI*R/N;          // half-circumference per sector
-  const tileW=arcLen*1.32;            // visual width when tiled
-  const startX=245;                   // tiled row starts here
-  const baseY=170;                    // baseline Y for tiled row
-  const tipH=R*0.90;                  // tip-to-arc height in tiled state
+  const arcLen=Math.PI*R/N;
+  const tileW=arcLen*1.32;
+  const startX=245;
+  const baseY=170;
+  const tipH=R*0.90;
+  // Build sectors with numeric start/end positions for interpolation
   const sectors=[];
   for(let i=0;i<N;i++){
     const a0=-Math.PI/2+i*step;
     const a1=a0+step;
-    // Arc endpoints relative to center
     const ax0=R*Math.cos(a0), ay0=R*Math.sin(a0);
     const ax1=R*Math.cos(a1), ay1=R*Math.sin(a1);
-    // Create GROUP for each sector (reliable SVG transform)
     const g=document.createElementNS(ns,'g');
-    g.setAttribute('class','pi-sector-g');
-    // Sector path with tip at (0,0)
     const p=document.createElementNS(ns,'path');
     const la=step>Math.PI?1:0;
     p.setAttribute('d',`M0,0 L${ax0.toFixed(1)},${ay0.toFixed(1)} A${R},${R} 0 ${la},1 ${ax1.toFixed(1)},${ay1.toFixed(1)} Z`);
     p.setAttribute('fill', i%2?'rgba(255,210,63,.65)':'rgba(255,159,67,.65)');
     p.setAttribute('stroke','#fff'); p.setAttribute('stroke-width','1.2');
     g.appendChild(p);
-    // Initial position: form the circle
-    g.setAttribute('transform',`translate(${cx},${cy})`);
     svg.appendChild(g);
-    sectors.push({g:g, i:i});
-    // Target: tiled row position
+    // Start position (forming circle)
+    const sx=cx, sy=cy, sr=0;
+    // End position (tiled row)
     const tx=startX+i*tileW;
     const isOdd=(i%2===1);
     const ty=isOdd?(baseY-tipH):baseY;
-    const rot=isOdd?180:0;
-    g.dataset.tx=tx; g.dataset.ty=ty; g.dataset.rot=rot;
+    const tr=isOdd?180:0;
+    g.setAttribute('transform',`translate(${sx},${sy})`);
+    sectors.push({g:g, sx:sx, sy:sy, sr:sr, tx:tx, ty:ty, tr:tr});
   }
-  // Animate to tiled positions using SVG transform attribute
-  setTimeout(()=>{
-    sectors.forEach(({g})=>{
-      const tx=+g.dataset.tx, ty=+g.dataset.ty, r=+g.dataset.rot;
-      g.style.transition='transform .8s cubic-bezier(.25,.46,.45,.94)';
-      // Use CSS transition on the group element (more reliable than on path)
-      g.style.transform=`translate(${tx}px,${ty}px) rotate(${r}deg)`;
+  // Smooth animation via requestAnimationFrame + SVG transform attribute
+  const dur=1000; const t0=performance.now();
+  (function animFrame(now){
+    const raw=Math.min(1,(now-t0)/dur);
+    // Ease out cubic: smooth deceleration
+    const ep=1-Math.pow(1-raw,3);
+    sectors.forEach(({g,sx,sy,sr,tx,ty,tr})=>{
+      const ix=sx+(tx-sx)*ep;
+      const iy=sy+(ty-sy)*ep;
+      const ir=sr+(tr-sr)*ep;
+      g.setAttribute('transform',`translate(${ix.toFixed(1)},${iy.toFixed(1)}) rotate(${ir.toFixed(1)})`);
     });
-    // Dimension labels after animation
-    setTimeout(()=>{
-      const rectW=N*tileW;
-      const dg=document.createElementNS(ns,'g');
-      dg.setAttribute('opacity','0');
-      dg.innerHTML=
-        `<line x1="${startX-6}" y1="${baseY+tipH+12}" x2="${startX+rectW+6}" y2="${baseY+tipH+12}" stroke="#ff6ba6" stroke-width="1.8" stroke-dasharray="4,3"/>`+
-        `<line x1="${startX-6}" y1="${baseY-tipH-4}" x2="${startX-6}" y2="${baseY+tipH+12}" stroke="#ff6ba6" stroke-width="1.8" stroke-dasharray="4,3"/>`+
-        `<line x1="${startX+rectW+6}" y1="${baseY-tipH-4}" x2="${startX+rectW+6}" y2="${baseY+tipH+12}" stroke="#ff6ba6" stroke-width="1.8" stroke-dasharray="4,3"/>`+
-        `<text x="${startX+rectW/2}" y="${baseY+tipH+26}" text-anchor="middle" font-size="12" font-family="Baloo 2,sans-serif" fill="#ff6ba6" font-weight="600">长 ≈ πr</text>`+
-        `<text x="${startX+rectW+14}" y="${baseY+4}" text-anchor="start" font-size="12" font-family="Baloo 2,sans-serif" fill="#ff6ba6" font-weight="600">宽=r</text>`;
-      svg.appendChild(dg);
-      requestAnimationFrame(()=>{ dg.style.transition='opacity .4s'; dg.setAttribute('opacity','1'); });
-    },900);
-  },300);
+    if(raw<1) requestAnimationFrame(animFrame);
+    else{
+      // Dimension labels after animation
+      setTimeout(()=>{
+        const rectW=N*tileW;
+        const dg=document.createElementNS(ns,'g');
+        dg.setAttribute('opacity','0');
+        dg.innerHTML=
+          `<line x1="${startX-6}" y1="${baseY+tipH+12}" x2="${startX+rectW+6}" y2="${baseY+tipH+12}" stroke="#ff6ba6" stroke-width="1.8" stroke-dasharray="4,3"/>`+
+          `<line x1="${startX-6}" y1="${baseY-tipH-4}" x2="${startX-6}" y2="${baseY+tipH+12}" stroke="#ff6ba6" stroke-width="1.8" stroke-dasharray="4,3"/>`+
+          `<line x1="${startX+rectW+6}" y1="${baseY-tipH-4}" x2="${startX+rectW+6}" y2="${baseY+tipH+12}" stroke="#ff6ba6" stroke-width="1.8" stroke-dasharray="4,3"/>`+
+          `<text x="${startX+rectW/2}" y="${baseY+tipH+26}" text-anchor="middle" font-size="12" font-family="Baloo 2,sans-serif" fill="#ff6ba6" font-weight="600">长 ≈ πr</text>`+
+          `<text x="${startX+rectW+14}" y="${baseY+4}" text-anchor="start" font-size="12" font-family="Baloo 2,sans-serif" fill="#ff6ba6" font-weight="600">宽=r</text>`;
+        svg.appendChild(dg);
+        requestAnimationFrame(()=>{ dg.style.transition='opacity .4s'; dg.setAttribute('opacity','1'); });
+      },150);
+    }
+  })(performance.now());
   piUnrolled=true;
   $('piFormula').innerHTML=`圆切成 ${N} 份再交错拼起来 → 越来越像<b>长方形</b>：长 ≈ π r，宽 = r`;
   $('piExplain').innerHTML=`扇形越切越细，拼出的图形越接近长方形。这个长方形的长 ≈ 圆周长的一半 = <b>π r</b>，宽 = <b>r</b>，所以 面积 = π r × r = <b>π r²</b>。`;
