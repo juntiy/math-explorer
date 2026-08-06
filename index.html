@@ -1766,53 +1766,59 @@ function piUnroll(){
   circ.setAttribute('fill','rgba(255,159,67,.10)'); circ.setAttribute('stroke','#ff9f43');
   circ.setAttribute('stroke-width','1.8'); circ.setAttribute('stroke-dasharray','5,4');
   svg.appendChild(circ);
-  // Sector geometry
+  // Pre-compute sector geometry (relative to tip at origin)
   const step=(2*Math.PI)/N;
   const arcLen=Math.PI*R/N;
   const tileW=arcLen*1.32;
   const startX=245;
   const baseY=170;
   const tipH=R*0.90;
-  // Build sectors with numeric start/end positions for interpolation
   const sectors=[];
   for(let i=0;i<N;i++){
     const a0=-Math.PI/2+i*step;
     const a1=a0+step;
+    // Arc endpoints relative to tip (origin)
     const ax0=R*Math.cos(a0), ay0=R*Math.sin(a0);
     const ax1=R*Math.cos(a1), ay1=R*Math.sin(a1);
-    const g=document.createElementNS(ns,'g');
-    const p=document.createElementNS(ns,'path');
-    const la=step>Math.PI?1:0;
-    p.setAttribute('d',`M0,0 L${ax0.toFixed(1)},${ay0.toFixed(1)} A${R},${R} 0 ${la},1 ${ax1.toFixed(1)},${ay1.toFixed(1)} Z`);
-    p.setAttribute('fill', i%2?'rgba(255,210,63,.65)':'rgba(255,159,67,.65)');
-    p.setAttribute('stroke','#fff'); p.setAttribute('stroke-width','1.2');
-    g.appendChild(p);
-    svg.appendChild(g);
-    // Start position (forming circle)
-    const sx=cx, sy=cy, sr=0;
-    // End position (tiled row)
-    const tx=startX+i*tileW;
     const isOdd=(i%2===1);
+    // Start: tip at circle center
+    const sx=cx, sy=cy;
+    // End: tip at tiled position
+    const tx=startX+i*tileW;
     const ty=isOdd?(baseY-tipH):baseY;
-    const tr=isOdd?180:0;
-    g.setAttribute('transform',`translate(${sx},${sy})`);
-    sectors.push({g:g, sx:sx, sy:sy, sr:sr, tx:tx, ty:ty, tr:tr});
+    const p=document.createElementNS(ns,'path');
+    p.setAttribute('fill', i%2?'rgba(255,210,63,.7)':'rgba(255,159,67,.7)');
+    p.setAttribute('stroke','#fff'); p.setAttribute('stroke-width','1.2');
+    svg.appendChild(p);
+    sectors.push({p:p, ax0:ax0, ay0:ay0, ax1:ax1, ay1:ay1,
+      R:R, la:(step>Math.PI?1:0),
+      sx:sx, sy:sy, tx:tx, ty:ty, flip:isOdd});
   }
-  // Smooth animation via requestAnimationFrame + SVG transform attribute
-  const dur=1000; const t0=performance.now();
+  // Animate by rebuilding path 'd' with absolute coords every frame
+  const dur=1200; const t0=performance.now();
   (function animFrame(now){
     const raw=Math.min(1,(now-t0)/dur);
-    // Ease out cubic: smooth deceleration
-    const ep=1-Math.pow(1-raw,3);
-    sectors.forEach(({g,sx,sy,sr,tx,ty,tr})=>{
-      const ix=sx+(tx-sx)*ep;
-      const iy=sy+(ty-sy)*ep;
-      const ir=sr+(tr-sr)*ep;
-      g.setAttribute('transform',`translate(${ix.toFixed(1)},${iy.toFixed(1)}) rotate(${ir.toFixed(1)})`);
+    const ep=1-Math.pow(1-raw,3); // ease-out cubic
+    sectors.forEach(({p,ax0,ay0,ax1,ay1,R,la,sx,sy,tx,ty,flip})=>{
+      // Interpolate tip position
+      const tipX=sx+(tx-sx)*ep;
+      const tipY=sy+(ty-sy)*ep;
+      // Flip arc points for odd sectors (rotate 180 around tip)
+      let fAx0=ax0, fAy0=ay0, fAx1=ax1, fAy1=ay1;
+      if(flip && ep>0.01){
+        const fr=ep; // interpolate flip
+        fAx0=ax0*(1-2*fr); fAy0=ay0*(1-2*fr);
+        fAx1=ax1*(1-2*fr); fAy1=ay1*(1-2*fr);
+      }
+      // Build absolute coordinate path (NO transform needed)
+      p.setAttribute('d',
+        `M${tipX.toFixed(1)},${tipY.toFixed(1)} `+
+        `L${(tipX+fAx0).toFixed(1)},${(tipY+fAy0).toFixed(1)} `+
+        `A${R},${R} 0 ${la},1 ${(tipX+fAx1).toFixed(1)},${(tipY+fAy1).toFixed(1)} Z`
+      );
     });
     if(raw<1) requestAnimationFrame(animFrame);
     else{
-      // Dimension labels after animation
       setTimeout(()=>{
         const rectW=N*tileW;
         const dg=document.createElementNS(ns,'g');
